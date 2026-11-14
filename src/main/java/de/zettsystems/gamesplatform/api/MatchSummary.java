@@ -12,6 +12,8 @@ import java.util.Objects;
  * @param title        the name of the match as the game shows it
  * @param status       open, running or finished
  * @param participants the accounts taking part, in the order the game lists them, no duplicates
+ * @param seats        how many accounts the match can hold, at least 1 and never fewer than take
+ *                     part; for a game that may start with fewer players, the most it allows
  * @param toMove       the participants the game is waiting for; empty unless the match is running.
  *                     Several accounts at once are fine for games with simultaneous turns.
  * @param lastChange   when the match last changed in a way a participant would notice
@@ -24,6 +26,7 @@ public record MatchSummary(
         String title,
         MatchStatus status,
         List<AccountId> participants,
+        int seats,
         List<AccountId> toMove,
         Instant lastChange,
         String viewPath
@@ -38,6 +41,13 @@ public record MatchSummary(
         toMove = Checks.distinct(toMove, "toMove");
         Objects.requireNonNull(lastChange, "lastChange");
         Checks.viewPath(viewPath, gameKey);
+        if (seats < 1) {
+            throw new IllegalArgumentException("a match has at least one seat, got " + seats);
+        }
+        if (participants.size() > seats) {
+            throw new IllegalArgumentException(participants.size() + " participants do not fit into "
+                    + seats + " seats");
+        }
         if (status != MatchStatus.RUNNING && !toMove.isEmpty()) {
             throw new IllegalArgumentException("only a running match waits for moves, but it is " + status);
         }
@@ -55,5 +65,15 @@ public record MatchSummary(
     /** Whether the game is waiting for this account to move. */
     public boolean isToMove(AccountId account) {
         return toMove.contains(account);
+    }
+
+    /** How many seats are still free. */
+    public int freeSeats() {
+        return seats - participants.size();
+    }
+
+    /** Whether someone can still join: the match is open and has a free seat. */
+    public boolean isJoinable() {
+        return status == MatchStatus.OPEN && freeSeats() > 0;
     }
 }

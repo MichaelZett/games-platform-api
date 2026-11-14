@@ -4,48 +4,56 @@
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=MichaelZett_games-platform-api&metric=alert_status)](https://sonarcloud.io/project/overview?id=MichaelZett_games-platform-api)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=MichaelZett_games-platform-api&metric=coverage)](https://sonarcloud.io/component_measures?id=MichaelZett_games-platform-api&metric=coverage)
 
-Der Vertrag zwischen einer Spieleplattform und ihren Spielen. Die Plattform
-zeigt in ihrer Lobby die Partien aller Spiele und führt eine Statistik über alle
-Spiele hinweg; die Spiele liefern ihr dafür Partieübersichten und melden das
-Ende einer Partie. Diese Bibliothek legt die gemeinsamen Typen fest.
+The contract between a games platform and its games. The platform shows the
+matches of all games in one lobby and keeps statistics across all games; the
+games supply match summaries for it and announce changes and the end of a
+match. This library defines the shared types.
 
-- Java 25, nur Datensätze und Schnittstellen.
-- Keine Abhängigkeit von Spring, Vaadin oder einem anderen Framework; einzige
-  Abhängigkeit ist [JSpecify](https://jspecify.dev/) für die
-  Null-Annotationen (das Paket ist `@NullMarked`).
-- Alle Datensätze sind unveränderlich und prüfen ihre Invarianten beim Anlegen:
-  `null` führt zu einer `NullPointerException` mit dem Feldnamen, ein
-  ungültiger Wert zu einer `IllegalArgumentException`.
+- Java 25, records and interfaces only.
+- No dependency on Spring, Vaadin or any other framework. The only dependency
+  is [JSpecify](https://jspecify.dev/) for the null annotations (the package is
+  `@NullMarked`).
+- All records are immutable and check their invariants on construction: a
+  missing value throws a `NullPointerException` naming the field, an invalid
+  one an `IllegalArgumentException`.
 
-Stand: `0.1.0-SNAPSHOT`, noch nicht veröffentlicht. Die Typen können sich bis
-zur ersten Version noch ändern.
+Status: `0.1.0-SNAPSHOT`, not published yet. The types may still change until
+the first release.
 
-## Typen
+## Types
 
-Alle im Paket `de.zettsystems.gamesplatform.api`.
+All in the package `de.zettsystems.gamesplatform.api`.
 
-| Typ | Zweck |
+| Type | Purpose |
 |---|---|
-| `AccountId` | Konto einer Person auf der Plattform (positive `long`-ID). |
-| `MatchStatus` | `OPEN` (wartet auf Mitspieler), `RUNNING`, `FINISHED`. |
-| `MatchSummary` | Partieübersicht: Spielkennung, Partie-ID, Titel, Status, Teilnehmer, wer am Zug ist, letzte Änderung, Pfad zur Partieansicht. |
-| `MatchDirectory` | Schnittstelle, die jedes Spiel umsetzt: Partien eines Kontos und offene Partien zum Beitreten. |
-| `MatchEnded` | Ereignis Partieende mit der Platzierung jedes Kontos. |
-| `Placement` | Platz eines Kontos; 1 ist der beste, Gleichstand teilt sich den Platz (1, 1, 3). |
+| `AccountId` | The platform account of a person (a positive `long` id). |
+| `MatchStatus` | `OPEN` (waiting for players), `RUNNING`, `FINISHED`. |
+| `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats, who is to move, last change, path of the match view. |
+| `MatchDirectory` | Implemented by every game: the matches of an account and the open matches a viewer could join. |
+| `MatchChanged` | Event: something the lobby shows has changed (join, leave, start, turn, title). Carries no summary; the platform asks the `MatchDirectory` again. |
+| `MatchEnded` | Event: a match has ended, with a `MatchResult`. |
+| `MatchResult` | Sealed: `Ranked` (a `Placement` per participant) or `Aborted` (the participants, no places). |
+| `Placement` | The place of an account; 1 is best, ties share a place (1, 1, 3). A `Departure` marks players who resigned or were eliminated; it does not change the place. |
 
-Wichtige Regeln, die die Datensätze prüfen:
+Rules the records check:
 
-- Die Spielkennung besteht aus Kleinbuchstaben, Ziffern und Bindestrich und
-  beginnt mit einem Buchstaben (`starfare`, `frontier-lords`).
-- Der Pfad zur Partieansicht liegt im Bereich des Spiels:
-  `/<spielkennung>/…`, ohne Schema, Host und Punkt-Segmente.
-- Am Zug sein können nur Teilnehmer, und nur in einer laufenden Partie.
-- Die Platzierungen eines Partieendes folgen der Wettkampf-Rangfolge
-  (1, 1, 3); jedes Konto steht genau einmal darin.
+- A game key consists of lower-case letters, digits and hyphens and starts with
+  a letter (`starfare`, `frontier-lords`).
+- The path of the match view lies within the game's area: `/<game-key>/…`,
+  without scheme, host or dot segments.
+- A match has at least one seat and never more participants than seats.
+  `openMatches` lists only joinable matches: open, with a free seat.
+- Only participants can be to move, and only in a running match.
+- A ranked result follows competition ranking (1, 1, 3) and names every account
+  exactly once; an aborted match names at least one participant.
 
-## Nutzung
+`MatchResult` may gain further cases in a later minor version. Prefer its
+methods (`participants()`, `winners()`, `placeOf(..)`), and give a `switch` over
+it a `default` branch.
 
-Abhängigkeit (sobald veröffentlicht; bis dahin per `publishToMavenLocal` oder
+## Usage
+
+Dependency (once published; until then through `publishToMavenLocal` or an
 `includeBuild`):
 
 ```groovy
@@ -54,7 +62,7 @@ dependencies {
 }
 ```
 
-Ein Spiel setzt die Schnittstelle um:
+A game implements the directory:
 
 ```java
 public class StarfareMatches implements MatchDirectory {
@@ -66,38 +74,43 @@ public class StarfareMatches implements MatchDirectory {
 
     @Override
     public List<MatchSummary> matchesOf(AccountId account) {
-        // offene und laufende Partien, an denen das Konto teilnimmt, zuletzt geänderte zuerst
+        // open and running matches the account takes part in, most recently changed first
     }
 
     @Override
     public List<MatchSummary> openMatches(AccountId viewer) {
-        // offene Partien, denen das Konto beitreten kann
+        // joinable matches the viewer is not part of yet
     }
 }
 ```
 
-und meldet das Ende einer Partie, in einer Spring-Anwendung zum Beispiel als
-Anwendungsereignis:
+and announces changes and the end of a match, in a Spring application for
+example as application events:
 
 ```java
-events.publishEvent(new MatchEnded("starfare", matchId, Instant.now(), List.of(
+events.publishEvent(new MatchChanged("starfare", matchId, Instant.now()));
+
+events.publishEvent(new MatchEnded("starfare", matchId, Instant.now(), MatchResult.ranked(List.of(
         new Placement(AccountId.of(17), 1),
-        new Placement(AccountId.of(23), 2))));
+        new Placement(AccountId.of(23), 2, Departure.RESIGNED)))));
+
+events.publishEvent(new MatchEnded("starfare", matchId, Instant.now(),
+        MatchResult.aborted(List.of(AccountId.of(17), AccountId.of(23)))));
 ```
 
-Die Plattform sammelt alle `MatchDirectory`-Umsetzungen ein und hört auf
-`MatchEnded`.
+The platform collects every `MatchDirectory` and listens to `MatchChanged` and
+`MatchEnded`, after the commit of the game's transaction.
 
-## Bauen
+## Building
 
 ```bash
-./gradlew build                  # Kompilieren, Tests, statische Analyse
-./gradlew publishToMavenLocal    # für die lokale Erprobung in einer Anwendung
+./gradlew build                  # compile, tests, static analysis
+./gradlew publishToMavenLocal    # to try it out in an application
 ```
 
-Statt `publishToMavenLocal` geht auch ein `includeBuild('../games-platform-api')`
-in der `settings.gradle` der Anwendung.
+Instead of `publishToMavenLocal`, an application can also use
+`includeBuild('../games-platform-api')` in its `settings.gradle`.
 
-## Lizenz
+## Licence
 
 [Apache License 2.0](LICENSE)

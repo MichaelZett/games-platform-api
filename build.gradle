@@ -66,6 +66,10 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(Javadoc).configureEach {
     options.encoding = 'UTF-8'
+    // Every check except "missing": the record components are documented as
+    // @param on the record, and one-line methods say in their first sentence
+    // what an @return would repeat.
+    options.addStringOption('Xdoclint:all,-missing', '-quiet')
 }
 
 // ErrorProne checks raised to ERROR as a safety net (same list as zs-identity).

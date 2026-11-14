@@ -1,10 +1,20 @@
 # Changelog
 
-Wichtige Änderungen an games-platform-api. Versionierung nach
-[SemVer](https://semver.org/); vor 1.0.0 kann eine Nebenversion den Vertrag
-brechen.
+Notable changes to games-platform-api. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows
+[SemVer](https://semver.org/); before 1.0.0 a minor version may break the
+contract.
 
 ## Unreleased
 
-- Erster Schnitt: `AccountId`, `MatchStatus`, `MatchSummary`,
-  `MatchDirectory`, `MatchEnded`, `Placement`.
+### Added
+
+- First cut of the contract between the platform and its games:
+  - `AccountId`, the platform account of a person.
+  - `MatchSummary` with `MatchStatus` and the number of seats, for the lobby.
+  - `MatchDirectory`, implemented by every game: the matches of an account and
+    the open matches a viewer could join.
+  - `MatchChanged`, published when something the lobby shows changes.
+  - `MatchEnded` with a `MatchResult`: either `Ranked` (one `Placement` per
+    participant in competition ranking, with an optional `Departure` for
+    resigned or eliminated players) or `Aborted`.

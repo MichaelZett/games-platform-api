@@ -8,7 +8,7 @@ import java.util.List;
  *
  * <p>Both queries return summaries of this game only ({@link MatchSummary#gameKey()} equals
  * {@link #gameKey()}), most recently changed first. They are read-only and may be called often,
- * for example on every visit to the lobby.
+ * for example on every visit to the lobby and after every {@link MatchChanged}.
  */
 public interface MatchDirectory {
 
@@ -22,8 +22,9 @@ public interface MatchDirectory {
     List<MatchSummary> matchesOf(AccountId account);
 
     /**
-     * The open matches the viewer could join: not yet taking part, and allowed to see the match.
-     * Matches the viewer already takes part in are listed by {@link #matchesOf(AccountId)}.
+     * The matches the viewer could join: every one of them is {@linkplain MatchSummary#isJoinable()
+     * joinable} (open, with a free seat), the viewer does not take part yet and may see it. Matches
+     * the viewer already takes part in are listed by {@link #matchesOf(AccountId)}.
      */
     List<MatchSummary> openMatches(AccountId viewer);
 }

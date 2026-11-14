@@ -7,7 +7,8 @@
     <Match>
         <Or>
             <Class name="de.zettsystems.gamesplatform.api.MatchSummary"/>
-            <Class name="de.zettsystems.gamesplatform.api.MatchEnded"/>
+            <Class name="de.zettsystems.gamesplatform.api.MatchResult$Ranked"/>
+            <Class name="de.zettsystems.gamesplatform.api.MatchResult$Aborted"/>
         </Or>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>

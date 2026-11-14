@@ -23,13 +23,14 @@ class MatchSummaryTest {
     @Test
     void keepsAllValuesOfARunningMatch() {
         MatchSummary summary = new MatchSummary("starfare", "42", "Andromeda", MatchStatus.RUNNING,
-                List.of(ALICE, BOB), List.of(BOB), NOW, "/starfare/game/42");
+                List.of(ALICE, BOB), 4, List.of(BOB), NOW, "/starfare/game/42");
 
         assertThat(summary.gameKey()).isEqualTo("starfare");
         assertThat(summary.matchId()).isEqualTo("42");
         assertThat(summary.title()).isEqualTo("Andromeda");
         assertThat(summary.status()).isEqualTo(MatchStatus.RUNNING);
         assertThat(summary.participants()).containsExactly(ALICE, BOB);
+        assertThat(summary.seats()).isEqualTo(4);
         assertThat(summary.toMove()).containsExactly(BOB);
         assertThat(summary.lastChange()).isEqualTo(NOW);
         assertThat(summary.viewPath()).isEqualTo("/starfare/game/42");
@@ -128,7 +129,7 @@ class MatchSummaryTest {
         List<AccountId> none = List.of();
         String viewPath = "/" + gameKey + "/game/42";
 
-        assertThatThrownBy(() -> new MatchSummary(gameKey, "42", "Andromeda", MatchStatus.OPEN, none, none, NOW,
+        assertThatThrownBy(() -> new MatchSummary(gameKey, "42", "Andromeda", MatchStatus.OPEN, none, 4, none, NOW,
                 viewPath))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("gameKey");
@@ -136,7 +137,7 @@ class MatchSummaryTest {
 
     @Test
     void acceptsAGameKeyWithDigitsAndHyphens() {
-        MatchSummary summary = new MatchSummary("frontier-lords2", "7", "Plains", MatchStatus.OPEN, List.of(),
+        MatchSummary summary = new MatchSummary("frontier-lords2", "7", "Plains", MatchStatus.OPEN, List.of(), 4,
                 List.of(), NOW, "/frontier-lords2/match/7");
 
         assertThat(summary.gameKey()).isEqualTo("frontier-lords2");
@@ -147,7 +148,7 @@ class MatchSummaryTest {
     void rejectsABlankMatchId(String matchId) {
         List<AccountId> none = List.of();
 
-        assertThatThrownBy(() -> new MatchSummary("starfare", matchId, "Andromeda", MatchStatus.OPEN, none, none,
+        assertThatThrownBy(() -> new MatchSummary("starfare", matchId, "Andromeda", MatchStatus.OPEN, none, 4, none,
                 NOW, "/starfare/game/42"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("matchId must not be blank");
@@ -157,7 +158,7 @@ class MatchSummaryTest {
     void rejectsABlankTitle() {
         List<AccountId> none = List.of();
 
-        assertThatThrownBy(() -> new MatchSummary("starfare", "42", " ", MatchStatus.OPEN, none, none, NOW,
+        assertThatThrownBy(() -> new MatchSummary("starfare", "42", " ", MatchStatus.OPEN, none, 4, none, NOW,
                 "/starfare/game/42"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("title must not be blank");
@@ -167,7 +168,7 @@ class MatchSummaryTest {
     void namesTheMissingValue() {
         List<AccountId> none = List.of();
 
-        assertThatThrownBy(() -> new MatchSummary("starfare", "42", "Andromeda", MatchStatus.OPEN, none, none, null,
+        assertThatThrownBy(() -> new MatchSummary("starfare", "42", "Andromeda", MatchStatus.OPEN, none, 4, none, null,
                 "/starfare/game/42"))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("lastChange");
@@ -177,7 +178,7 @@ class MatchSummaryTest {
     void requiresAStatus() {
         List<AccountId> none = List.of();
 
-        assertThatThrownBy(() -> new MatchSummary("starfare", "42", "Andromeda", null, none, none, NOW,
+        assertThatThrownBy(() -> new MatchSummary("starfare", "42", "Andromeda", null, none, 4, none, NOW,
                 "/starfare/game/42"))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("status");
@@ -210,15 +211,71 @@ class MatchSummaryTest {
                 .hasMessageContaining("viewPath");
     }
 
+    @Test
+    void countsTheFreeSeats() {
+        MatchSummary summary = seated(MatchStatus.OPEN, List.of(ALICE), 4);
+
+        assertThat(summary.freeSeats()).isEqualTo(3);
+        assertThat(summary.isJoinable()).isTrue();
+    }
+
+    @Test
+    void aFullOpenMatchIsNotJoinable() {
+        MatchSummary summary = seated(MatchStatus.OPEN, List.of(ALICE, BOB), 2);
+
+        assertThat(summary.freeSeats()).isZero();
+        assertThat(summary.isJoinable()).isFalse();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = MatchStatus.class, names = {"RUNNING", "FINISHED"})
+    void onlyAnOpenMatchIsJoinable(MatchStatus status) {
+        MatchSummary summary = seated(status, List.of(ALICE), 4);
+
+        assertThat(summary.isJoinable()).isFalse();
+    }
+
+    @Test
+    void acceptsASingleSeat() {
+        MatchSummary summary = seated(MatchStatus.RUNNING, List.of(ALICE), 1);
+
+        assertThat(summary.freeSeats()).isZero();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void rejectsAMatchWithoutSeats(int seats) {
+        List<AccountId> none = List.of();
+
+        assertThatThrownBy(() -> seated(MatchStatus.OPEN, none, seats))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("at least one seat");
+    }
+
+    @Test
+    void rejectsMoreParticipantsThanSeats() {
+        List<AccountId> participants = List.of(ALICE, BOB, CAROL);
+
+        assertThatThrownBy(() -> seated(MatchStatus.RUNNING, participants, 2))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("3 participants do not fit into 2 seats");
+    }
+
+    private static MatchSummary seated(MatchStatus status, List<AccountId> participants, int seats) {
+        return new MatchSummary("starfare", "42", "Andromeda", status, participants, seats, List.of(), NOW,
+                "/starfare/game/42");
+    }
+
     private static MatchSummary running(List<AccountId> participants, List<AccountId> toMove) {
         return withStatus(MatchStatus.RUNNING, participants, toMove);
     }
 
     private static MatchSummary withStatus(MatchStatus status, List<AccountId> participants, List<AccountId> toMove) {
-        return new MatchSummary("starfare", "42", "Andromeda", status, participants, toMove, NOW, "/starfare/game/42");
+        return new MatchSummary("starfare", "42", "Andromeda", status, participants, 4, toMove, NOW, "/starfare/game/42");
     }
 
     private static MatchSummary withPath(String viewPath) {
-        return new MatchSummary("starfare", "42", "Andromeda", MatchStatus.OPEN, List.of(), List.of(), NOW, viewPath);
+        return new MatchSummary("starfare", "42", "Andromeda", MatchStatus.OPEN, List.of(), 4, List.of(), NOW,
+                viewPath);
     }
 }
