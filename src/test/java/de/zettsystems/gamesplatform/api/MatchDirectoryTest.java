@@ -45,7 +45,7 @@ class MatchDirectoryTest {
 
     private static MatchSummary summary(String id, MatchStatus status, List<AccountId> participants, int seats,
                                         List<AccountId> toMove, Instant lastChange) {
-        return new MatchSummary("starfare", id, "Match " + id, status, participants, seats, toMove, lastChange,
+        return new MatchSummary("starfare", id, "Match " + id, status, participants, seats, 0, toMove, lastChange,
                 "/starfare/game/" + id);
     }
 

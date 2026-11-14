@@ -11,7 +11,7 @@ contract.
 
 - First cut of the contract between the platform and its games:
   - `AccountId`, the platform account of a person.
-  - `MatchSummary` with `MatchStatus` and the number of seats, for the lobby.
+  - `MatchSummary` with `MatchStatus`, the number of seats and of computer opponents among them, for the lobby.
   - `MatchDirectory`, implemented by every game: the matches of an account and
     the open matches a viewer could join.
   - `MatchChanged`, published when something the lobby shows changes.

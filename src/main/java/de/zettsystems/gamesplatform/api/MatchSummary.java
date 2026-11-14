@@ -12,8 +12,10 @@ import java.util.Objects;
  * @param title        the name of the match as the game shows it
  * @param status       open, running or finished
  * @param participants the accounts taking part, in the order the game lists them, no duplicates
- * @param seats        how many accounts the match can hold, at least 1 and never fewer than take
- *                     part; for a game that may start with fewer players, the most it allows
+ * @param seats        how many players the match has in total, people and computer opponents;
+ *                     for a game that may start with fewer players, the most it allows
+ * @param computerSeats how many of the seats computer opponents take; the rest is for people, at
+ *                     least one, and never fewer than take part
  * @param toMove       the participants the game is waiting for; empty unless the match is running.
  *                     Several accounts at once are fine for games with simultaneous turns.
  * @param lastChange   when the match last changed in a way a participant would notice
@@ -27,6 +29,7 @@ public record MatchSummary(
         MatchStatus status,
         List<AccountId> participants,
         int seats,
+        int computerSeats,
         List<AccountId> toMove,
         Instant lastChange,
         String viewPath
@@ -44,9 +47,16 @@ public record MatchSummary(
         if (seats < 1) {
             throw new IllegalArgumentException("a match has at least one seat, got " + seats);
         }
-        if (participants.size() > seats) {
+        if (computerSeats < 0) {
+            throw new IllegalArgumentException("computer seats cannot be negative, got " + computerSeats);
+        }
+        if (computerSeats >= seats) {
+            throw new IllegalArgumentException("a match keeps at least one seat for a person, but computer opponents take "
+                    + computerSeats + " of " + seats + " seats");
+        }
+        if (participants.size() > seats - computerSeats) {
             throw new IllegalArgumentException(participants.size() + " participants do not fit into "
-                    + seats + " seats");
+                    + (seats - computerSeats) + " seats for people");
         }
         if (status != MatchStatus.RUNNING && !toMove.isEmpty()) {
             throw new IllegalArgumentException("only a running match waits for moves, but it is " + status);
@@ -67,9 +77,14 @@ public record MatchSummary(
         return toMove.contains(account);
     }
 
-    /** How many seats are still free. */
+    /** How many seats are for people: all seats minus those of computer opponents. */
+    public int humanSeats() {
+        return seats - computerSeats;
+    }
+
+    /** How many seats for people are still free; computer opponents never leave a seat free. */
     public int freeSeats() {
-        return seats - participants.size();
+        return humanSeats() - participants.size();
     }
 
     /** Whether someone can still join: the match is open and has a free seat. */

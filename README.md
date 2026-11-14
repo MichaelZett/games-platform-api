@@ -28,7 +28,7 @@ All in the package `de.zettsystems.gamesplatform.api`.
 |---|---|
 | `AccountId` | The platform account of a person (a positive `long` id). |
 | `MatchStatus` | `OPEN` (waiting for players), `RUNNING`, `FINISHED`. |
-| `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats, who is to move, last change, path of the match view. |
+| `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats and how many of them computer opponents take, who is to move, last change, path of the match view. |
 | `MatchDirectory` | Implemented by every game: the matches of an account and the open matches a viewer could join. |
 | `MatchChanged` | Event: something the lobby shows has changed (join, leave, start, turn, title). Carries no summary; the platform asks the `MatchDirectory` again. |
 | `MatchEnded` | Event: a match has ended, with a `MatchResult`. |
@@ -41,8 +41,11 @@ Rules the records check:
   a letter (`starfare`, `frontier-lords`).
 - The path of the match view lies within the game's area: `/<game-key>/…`,
   without scheme, host or dot segments.
-- A match has at least one seat and never more participants than seats.
-  `openMatches` lists only joinable matches: open, with a free seat.
+- A match sets its number of players (`seats`) and how many of them are computer
+  opponents (`computerSeats`); people take the rest (`humanSeats()`, at least
+  one). Participants never outnumber the seats for people, and `freeSeats()`
+  counts only those. `openMatches` lists only joinable matches: open, with a
+  free seat.
 - Only participants can be to move, and only in a running match.
 - A ranked result follows competition ranking (1, 1, 3) and names every account
   exactly once; an aborted match names at least one participant.
