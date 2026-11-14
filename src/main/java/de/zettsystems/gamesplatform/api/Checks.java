@@ -53,8 +53,9 @@ final class Checks {
         Objects.requireNonNull(viewPath, "viewPath");
         String prefix = "/" + gameKey + "/";
         URI uri = parse(viewPath);
+        // Without a scheme the URI is hierarchical, so it always has a (possibly empty) path.
         String path = uri.getRawPath();
-        if (uri.getScheme() != null || uri.getRawAuthority() != null || path == null
+        if (uri.getScheme() != null || uri.getRawAuthority() != null
                 || !path.startsWith(prefix) || path.length() == prefix.length()
                 || path.contains("//") || !uri.normalize().getRawPath().equals(path)) {
             throw new IllegalArgumentException(
