@@ -1,0 +1,47 @@
+# CodeQL scans the code for security problems that a compiler and the usual
+# static analysis do not see. Free for public repositories; on a private one the
+# job stays dormant instead of failing on a missing entitlement.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Mondays at 05:00: the queries improve over time.
+    - cron: '0 5 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    if: github.event.repository.visibility == 'public'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c  # v6.4.1
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: java-kotlin
+          build-mode: manual
+
+      # Without the build cache: CodeQL reads the code by watching javac, and a
+      # push that leaves the sources alone would otherwise take every class from
+      # the cache -- no javac, nothing seen, the run fails.
+      - name: Compile
+        run: ./gradlew compileJava compileTestJava --no-daemon --no-build-cache
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4

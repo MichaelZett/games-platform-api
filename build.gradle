@@ -1,0 +1,276 @@
+import com.github.spotbugs.snom.Confidence
+import com.github.spotbugs.snom.Effort
+import com.github.spotbugs.snom.SpotBugsTask
+import net.ltgt.gradle.errorprone.CheckSeverity
+
+plugins {
+    id 'java-library'
+    id 'jacoco'
+    id 'signing'
+    id 'com.vanniktech.maven.publish' version "${vanniktechPublishVersion}"
+    id 'net.ltgt.errorprone' version "${errorproneGradleVersion}"
+    id 'net.ltgt.nullaway' version "${nullawayGradleVersion}"
+    id 'com.github.spotbugs' version "${spotbugsGradleVersion}"
+    id 'io.github.ben-manes.versions' version "${benmanesVersion}"
+    id 'org.sonarqube' version "${sonarVersion}"
+}
+
+// The contract between the games platform host and the games: records and
+// interfaces only, deliberately without Spring and Vaadin, so that every game
+// can implement it whatever else it runs on.
+description = 'Contract between the games platform and its games: match summaries, ' +
+        'the match directory a game offers and the match-ended event -- without Spring or Vaadin.'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of("${javaVersion}")
+    }
+}
+
+// Automatic-Module-Name instead of module-info.java: the consumers run on the
+// classpath. The manifest entry still gives an application that uses JPMS a
+// stable module name instead of one derived from the file name.
+tasks.named('jar') {
+    manifest {
+        attributes('Automatic-Module-Name': 'de.zettsystems.gamesplatform.api',
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version)
+    }
+    metaInf {
+        from(file('LICENSE'))
+    }
+}
+
+jacoco {
+    toolVersion = "${jacocoVersion}"
+}
+
+dependencies {
+    // api, not compileOnly: @NullMarked on the package is part of the contract,
+    // and a consumer running NullAway needs the annotations to read it.
+    api "org.jspecify:jspecify:${jspecifyVersion}"
+
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    errorprone "com.google.errorprone:error_prone_core:${errorproneCoreVersion}"
+    errorprone "com.uber.nullaway:nullaway:${nullawayCoreVersion}"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-parameters']
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// ErrorProne checks raised to ERROR as a safety net (same list as zs-identity).
+def errorproneEnforcedChecks = [
+        'ArrayRecordComponent',
+        'EmptyCatch',
+        'EqualsGetClass',
+        'FutureReturnValueIgnored',
+        'InlineFormatString',
+        'JavaTimeDefaultTimeZone',
+        'JdkObsolete',
+        'MissingOverride',
+        'MixedMutabilityReturnType',
+        'OperatorPrecedence',
+        'ReferenceEquality',
+        'StringSplitter',
+        'SuperCallToObjectMethod',
+        'UnnecessaryMethodReference',
+]
+
+tasks.named('compileJava').configure {
+    options.errorprone {
+        disableWarningsInGeneratedCode = true
+        nullaway {
+            severity = CheckSeverity.ERROR
+            annotatedPackages.add('de.zettsystems')
+        }
+        errorproneEnforcedChecks.each { check -> error(check) }
+    }
+}
+
+tasks.named('compileTestJava').configure {
+    options.errorprone.enabled = false
+}
+
+spotbugs {
+    effort = Effort.valueOf('MAX')
+    reportLevel = Confidence.valueOf('LOW')
+    excludeFilter = file('config/spotbugs/exclude.xml')
+}
+
+tasks.withType(SpotBugsTask).configureEach {
+    reports {
+        html {
+            required = true
+            outputLocation = layout.buildDirectory.file("reports/spotbugs/${name}.html")
+        }
+        sarif {
+            required = true
+            outputLocation = layout.buildDirectory.file("reports/spotbugs/${name}.sarif")
+        }
+        xml.required = false
+    }
+}
+
+// SpotBugs on test code is almost pure noise.
+tasks.named('spotbugsTest') {
+    enabled = false
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+jacocoTestReport {
+    dependsOn tasks.named('test')
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// The library is nothing but invariants; every one of them has a test.
+jacocoTestCoverageVerification {
+    dependsOn tasks.named('jacocoTestReport')
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.95
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.90
+            }
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('jacocoTestReport')
+    dependsOn tasks.named('jacocoTestCoverageVerification')
+}
+
+// Publishing to Maven Central through the Central Portal, set up like
+// zs-identity. The plugin builds the publication, the sources and javadoc jars
+// and the signatures; Central rejects a bundle without any of them.
+//
+// A SNAPSHOT never leaves the machine: without a release version Central is
+// not configured, so even a bare `./gradlew publish` can only reach mavenLocal.
+// Nor is a SNAPSHOT signed, so publishToMavenLocal works on a machine without
+// the signing key. Credentials (mavenCentralUsername/-Password, the portal's
+// publisher token) and the signing key come from ~/.gradle/gradle.properties or
+// the ORG_GRADLE_PROJECT_* variables of the release job.
+def isRelease = !version.toString().endsWith('-SNAPSHOT')
+
+if (!project.hasProperty('signingInMemoryKey')) {
+    signing {
+        useGpgCmd()
+    }
+}
+
+mavenPublishing {
+    if (isRelease) {
+        publishToMavenCentral()
+        signAllPublications()
+    }
+
+    pom {
+        name = 'Games Platform API'
+        description = project.description
+        url = 'https://github.com/MichaelZett/games-platform-api'
+        inceptionYear = '2026'
+        licenses {
+            license {
+                name = 'The Apache License, Version 2.0'
+                url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution = 'repo'
+            }
+        }
+        developers {
+            developer {
+                id = 'michaelzett'
+                name = 'Michael Zoeller'
+                email = 'michael2.zoeller@gmail.com'
+                organization = 'ZettSystems'
+                organizationUrl = 'https://zettsystems.de/'
+            }
+        }
+        scm {
+            url = 'https://github.com/MichaelZett/games-platform-api'
+            connection = 'scm:git:https://github.com/MichaelZett/games-platform-api.git'
+            developerConnection = 'scm:git:ssh://git@github.com/MichaelZett/games-platform-api.git'
+        }
+        issueManagement {
+            system = 'GitHub'
+            url = 'https://github.com/MichaelZett/games-platform-api/issues'
+        }
+    }
+}
+
+// Show stable releases only, and no major bumps. Overrides:
+//   ./gradlew dependencyUpdates -Punstable   (shows RC/M/beta)
+//   ./gradlew dependencyUpdates -Pmajor      (shows major bumps)
+def depUpdateIsUnstable = { String version ->
+    def stableKeywords = ['RELEASE', 'FINAL', 'GA']
+    def stable = stableKeywords.any { version.toUpperCase(Locale.ROOT).contains(it) }
+    def numericLooking = version ==~ /^[0-9,.v-]+(-r)?$/
+    return !stable && !numericLooking
+}
+def depUpdateIsMajorBump = { String current, String candidate ->
+    def cur = current.split(/[.\-]/, 2)[0]
+    def cand = candidate.split(/[.\-]/, 2)[0]
+    return cur.isInteger() && cand.isInteger() && cand.toInteger() > cur.toInteger()
+}
+// Read here rather than inside the closure: it runs at execution time, where
+// `project` is the deprecated Task.project.
+def allowUnstable = project.hasProperty('unstable')
+def allowMajor = project.hasProperty('major')
+dependencyUpdates {
+    rejectVersionIf { selection ->
+        if (!allowUnstable
+                && depUpdateIsUnstable(selection.candidate.version)
+                && !depUpdateIsUnstable(selection.currentVersion)) {
+            return true
+        }
+        if (!allowMajor
+                && depUpdateIsMajorBump(selection.currentVersion, selection.candidate.version)) {
+            return true
+        }
+        return false
+    }
+}
+
+// Locally the analysis goes to the developer's own SonarQube instance; in CI
+// to SonarQube Cloud, which is free for public projects. The organization is
+// the switch: if one is given, Cloud is meant.
+def sonarOrganization = findProperty('sonar.organization') ?: System.getenv('SONAR_ORGANIZATION')
+def sonarHostDefault = sonarOrganization ? 'https://sonarcloud.io' : 'http://localhost:9000'
+def sonarKeyDefault = sonarOrganization ? 'MichaelZett_games-platform-api' : 'games-platform-api'
+
+sonar {
+    properties {
+        property 'sonar.projectKey', findProperty('sonar.projectKey') ?: sonarKeyDefault
+        property 'sonar.projectName', 'games-platform-api'
+        property 'sonar.host.url',
+                findProperty('sonar.host.url') ?: System.getenv('SONAR_HOST_URL') ?: sonarHostDefault
+        if (sonarOrganization) {
+            property 'sonar.organization', sonarOrganization
+        }
+        def sonarTokenValue = findProperty('sonar.token') ?: System.getenv('SONAR_TOKEN')
+        if (sonarTokenValue) {
+            property 'sonar.token', sonarTokenValue
+        }
+    }
+}

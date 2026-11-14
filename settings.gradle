@@ -1,0 +1,14 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'games-platform-api'
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+}
