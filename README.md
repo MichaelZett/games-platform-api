@@ -1,5 +1,6 @@
 # games-platform-api
 
+[![Maven Central](https://img.shields.io/maven-central/v/de.zettsystems/games-platform-api)](https://central.sonatype.com/artifact/de.zettsystems/games-platform-api)
 [![Build](https://github.com/MichaelZett/games-platform-api/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/MichaelZett/games-platform-api/actions/workflows/build.yml?query=branch%3Amain)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=MichaelZett_games-platform-api&metric=alert_status)](https://sonarcloud.io/project/overview?id=MichaelZett_games-platform-api)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=MichaelZett_games-platform-api&metric=coverage)](https://sonarcloud.io/component_measures?id=MichaelZett_games-platform-api&metric=coverage)
@@ -17,8 +18,8 @@ match. This library defines the shared types.
   missing value throws a `NullPointerException` naming the field, an invalid
   one an `IllegalArgumentException`.
 
-Status: `0.1.0-SNAPSHOT`, not published yet. The types may still change until
-the first release.
+Status: `0.1.0` on Maven Central. Before 1.0.0 a minor version may break the
+contract; the changelog says what changed.
 
 ## Types
 
@@ -58,8 +59,7 @@ it a `default` branch.
 
 ## Usage
 
-Dependency (once published; until then through `publishToMavenLocal` or an
-`includeBuild`):
+Dependency from Maven Central:
 
 ```groovy
 dependencies {

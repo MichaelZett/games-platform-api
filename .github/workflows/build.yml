@@ -124,11 +124,10 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c  # v6.4.1
 
-      # Uploads and lets Central validate; the release itself is a click in the
-      # Central Portal (Deployments) until a first version went through cleanly.
-      # Then switch to publishAndReleaseToMavenCentral, as in zs-identity.
-      - name: Publish to Maven Central
-        run: ./gradlew publishToMavenCentral --no-daemon
+      # Uploads, waits for Central's validation and releases; fails the job if
+      # the validation does not pass. As in zs-identity.
+      - name: Publish and release to Maven Central
+        run: ./gradlew publishAndReleaseToMavenCentral --no-daemon
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

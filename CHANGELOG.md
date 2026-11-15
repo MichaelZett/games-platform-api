@@ -5,7 +5,7 @@ Notable changes to games-platform-api. The format follows
 [SemVer](https://semver.org/); before 1.0.0 a minor version may break the
 contract.
 
-## Unreleased
+## 0.1.0 - 2026-11-15
 
 ### Added
 
@@ -17,4 +17,8 @@ contract.
   - `MatchChanged`, published when something the lobby shows changes.
   - `MatchEnded` with a `MatchResult`: either `Ranked` (one `Placement` per
     participant in competition ranking, with an optional `Departure` for
-    resigned or eliminated players) or `Aborted`.
+    resigned or eliminated players) or `Aborted`. Computer opponents count as
+    players but are not listed, so the places of the accounts may skip theirs.
+  - Events may come within the game's transaction or, for a game that keeps its
+    state outside the database, after the change is stored; listeners handle
+    them after the commit or right away without a transaction.
