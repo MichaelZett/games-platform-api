@@ -1,4 +1,4 @@
-package de.zettsystems.gamesplatform.api;
+package de.zettsystems.gamesplatformapi;
 
 /** Where a match stands, as far as the platform is concerned. */
 public enum MatchStatus {

@@ -1,4 +1,4 @@
-package de.zettsystems.gamesplatform.api;
+package de.zettsystems.gamesplatformapi;
 
 /**
  * The account of a person on the platform: the user id of the identity building block

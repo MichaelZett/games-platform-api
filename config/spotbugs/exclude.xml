@@ -6,9 +6,9 @@
          cannot see that and reports every list component. -->
     <Match>
         <Or>
-            <Class name="de.zettsystems.gamesplatform.api.MatchSummary"/>
-            <Class name="de.zettsystems.gamesplatform.api.MatchResult$Ranked"/>
-            <Class name="de.zettsystems.gamesplatform.api.MatchResult$Aborted"/>
+            <Class name="de.zettsystems.gamesplatformapi.MatchSummary"/>
+            <Class name="de.zettsystems.gamesplatformapi.MatchResult$Ranked"/>
+            <Class name="de.zettsystems.gamesplatformapi.MatchResult$Aborted"/>
         </Or>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>

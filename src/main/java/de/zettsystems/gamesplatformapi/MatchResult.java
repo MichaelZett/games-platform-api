@@ -1,4 +1,4 @@
-package de.zettsystems.gamesplatform.api;
+package de.zettsystems.gamesplatformapi;
 
 import java.util.Comparator;
 import java.util.List;

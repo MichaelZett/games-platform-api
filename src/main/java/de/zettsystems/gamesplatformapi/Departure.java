@@ -1,4 +1,4 @@
-package de.zettsystems.gamesplatform.api;
+package de.zettsystems.gamesplatformapi;
 
 /**
  * Whether and how a participant left a match before its end. The participant still has a place;

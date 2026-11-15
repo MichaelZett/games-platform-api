@@ -32,7 +32,7 @@ java {
 // stable module name instead of one derived from the file name.
 tasks.named('jar') {
     manifest {
-        attributes('Automatic-Module-Name': 'de.zettsystems.gamesplatform.api',
+        attributes('Automatic-Module-Name': 'de.zettsystems.gamesplatformapi',
                 'Implementation-Title': project.name,
                 'Implementation-Version': project.version)
     }

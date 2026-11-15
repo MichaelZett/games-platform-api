@@ -22,7 +22,7 @@ the first release.
 
 ## Types
 
-All in the package `de.zettsystems.gamesplatform.api`.
+All in the package `de.zettsystems.gamesplatformapi`.
 
 | Type | Purpose |
 |---|---|

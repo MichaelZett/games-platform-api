@@ -1,4 +1,4 @@
-package de.zettsystems.gamesplatform.api;
+package de.zettsystems.gamesplatformapi;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
