@@ -33,7 +33,7 @@ All in the package `de.zettsystems.gamesplatformapi`.
 | `MatchChanged` | Event: something the lobby shows has changed (join, leave, start, turn, title). Carries no summary; the platform asks the `MatchDirectory` again. |
 | `MatchEnded` | Event: a match has ended, with a `MatchResult`. |
 | `MatchResult` | Sealed: `Ranked` (a `Placement` per participant) or `Aborted` (the participants, no places). |
-| `Placement` | The place of an account; 1 is best, ties share a place (1, 1, 3). A `Departure` marks players who resigned or were eliminated; it does not change the place. |
+| `Placement` | The place of an account; 1 is best, ties share a place (1, 1, 3), computer opponents count but are not listed. A `Departure` marks players who resigned or were eliminated; it does not change the place. |
 
 Rules the records check:
 
@@ -48,7 +48,9 @@ Rules the records check:
   free seat.
 - Only participants can be to move, and only in a running match.
 - A ranked result follows competition ranking (1, 1, 3) and names every account
-  exactly once; an aborted match names at least one participant.
+  exactly once. Computer opponents count as players but are not listed, so the
+  places of the accounts may skip theirs (an account on place 2 lost to a
+  computer opponent); an aborted match names at least one participant.
 
 `MatchResult` may gain further cases in a later minor version. Prefer its
 methods (`participants()`, `winners()`, `placeOf(..)`), and give a `switch` over
@@ -102,7 +104,11 @@ events.publishEvent(new MatchEnded("starfare", matchId, Instant.now(),
 ```
 
 The platform collects every `MatchDirectory` and listens to `MatchChanged` and
-`MatchEnded`, after the commit of the game's transaction.
+`MatchEnded` after the commit of the game's transaction, or right away if the
+game published the event outside a transaction (a game that keeps its state
+outside the database transaction publishes once the change is stored). In
+Spring that is a `@TransactionalEventListener` with `fallbackExecution = true`.
+A game announces the end of a match once, even if it lets the match go on.
 
 ## Building
 

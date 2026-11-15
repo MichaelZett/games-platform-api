@@ -112,12 +112,12 @@ class MatchResultTest {
         }
 
         @Test
-        void rejectsAResultWithoutPlaceOne() {
-            List<Placement> placements = List.of(new Placement(ALICE, 2), new Placement(BOB, 3));
+        void leavesPlaceOneToAComputerOpponentThatWon() {
+            MatchResult result = MatchResult.ranked(List.of(new Placement(ALICE, 2), new Placement(BOB, 3)));
 
-            assertThatThrownBy(() -> MatchResult.ranked(placements))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("competition ranking");
+            assertThat(result.winners()).isEmpty();
+            assertThat(result.placeOf(ALICE)).hasValue(2);
+            assertThat(result.participants()).containsExactly(ALICE, BOB);
         }
 
         @Test
@@ -131,8 +131,18 @@ class MatchResultTest {
         }
 
         @Test
-        void rejectsAGapInThePlaces() {
-            List<Placement> placements = List.of(new Placement(ALICE, 1), new Placement(BOB, 3));
+        void skipsPlacesTakenByComputerOpponents() {
+            MatchResult result = MatchResult.ranked(List.of(new Placement(ALICE, 1), new Placement(BOB, 3),
+                    new Placement(CAROL, 3)));
+
+            assertThat(result.winners()).containsExactly(ALICE);
+            assertThat(result.placeOf(CAROL)).hasValue(3);
+        }
+
+        @Test
+        void rejectsAPlaceBetterThanTheAccountsBeforeIt() {
+            List<Placement> placements = List.of(new Placement(ALICE, 2), new Placement(BOB, 2),
+                    new Placement(CAROL, 2), new Placement(DAVE, 3));
 
             assertThatThrownBy(() -> MatchResult.ranked(placements))
                     .isInstanceOf(IllegalArgumentException.class)

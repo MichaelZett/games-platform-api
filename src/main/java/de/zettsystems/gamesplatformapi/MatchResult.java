@@ -18,7 +18,7 @@ public sealed interface MatchResult permits MatchResult.Ranked, MatchResult.Abor
     /** The accounts that took part; for a ranked result best first. */
     List<AccountId> participants();
 
-    /** The accounts on place 1; more than one if they tied, none if the match was aborted. */
+    /** The accounts on place 1; more than one if they tied, none if the match was aborted or a computer opponent won. */
     List<AccountId> winners();
 
     /** The place of the account, or empty if it did not take part or the match was aborted. */
@@ -37,9 +37,12 @@ public sealed interface MatchResult permits MatchResult.Ranked, MatchResult.Abor
     /**
      * The match was played to the end and every participant has a place.
      *
-     * <p>The places follow competition ranking: the best place is 1, accounts that tie share a
-     * place, and the next place skips accordingly (1, 1, 3). The placements are kept sorted by
-     * place; accounts that share a place stay in the order they were given.
+     * <p>The places follow competition ranking: the best place is 1, players that tie share a
+     * place, and the next place skips accordingly (1, 1, 3). Computer opponents count as players
+     * but are not listed, so the places of the accounts may skip theirs: if a computer opponent
+     * wins, the best account is on place 2, and nobody of the listed accounts {@linkplain
+     * #winners() won}. The placements are kept sorted by place; accounts that share a place stay
+     * in the order they were given.
      *
      * @param placements one placement per participant, at least one
      */
@@ -55,11 +58,13 @@ public sealed interface MatchResult permits MatchResult.Ranked, MatchResult.Abor
             checkRanking(placements);
         }
 
+        // Unlisted computer opponents may take any place in between, so a place can be higher than
+        // its rank among the accounts, but never lower: i accounts before it are strictly better.
         private static void checkRanking(List<Placement> sorted) {
             for (int i = 0; i < sorted.size(); i++) {
                 int place = sorted.get(i).place();
                 boolean tie = i > 0 && place == sorted.get(i - 1).place();
-                if (!tie && place != i + 1) {
+                if (!tie && place < i + 1) {
                     throw new IllegalArgumentException("places must follow competition ranking (1, 1, 3), but place "
                             + place + " stands at rank " + (i + 1) + ": " + sorted);
                 }

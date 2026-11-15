@@ -6,8 +6,9 @@ import java.util.Objects;
  * Where one account finished in a match.
  *
  * @param account   the account
- * @param place     1 for the best; accounts that share a place share the number, and the next
- *                  place skips accordingly (1, 1, 3)
+ * @param place     1 for the best; players that share a place share the number, and the next
+ *                  place skips accordingly (1, 1, 3). Computer opponents count as players, so
+ *                  an account that lost to one is on place 2 or lower.
  * @param departure whether the account resigned or was eliminated before the end; it does not
  *                  change the place
  */

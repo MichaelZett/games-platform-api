@@ -7,8 +7,11 @@ import java.util.OptionalInt;
 
 /**
  * A match has ended, with a ranking or aborted. The game publishes this event once per match,
- * within the transaction that ends it; a listener that needs the committed state listens after
- * the commit. The game does not publish a {@link MatchChanged} for the end in addition.
+ * within the transaction that ends it, or after the end is stored if the game keeps its state
+ * outside a transaction. A listener therefore handles it after the commit, or right away when no
+ * transaction is active (in Spring a {@code @TransactionalEventListener} with
+ * {@code fallbackExecution = true}). The game does not publish a {@link MatchChanged} for the end
+ * in addition, and it does not announce a second end if it lets the match go on afterwards.
  *
  * @param gameKey the key of the game, as in its game descriptor
  * @param matchId the game's id of the match, unique within the game
@@ -34,7 +37,7 @@ public record MatchEnded(String gameKey, String matchId, Instant endedAt, MatchR
         return result.participants();
     }
 
-    /** The accounts on place 1; more than one if they tied, none if the match was aborted. */
+    /** The accounts on place 1; more than one if they tied, none if the match was aborted or a computer opponent won. */
     public List<AccountId> winners() {
         return result.winners();
     }
