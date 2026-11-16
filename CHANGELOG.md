@@ -5,6 +5,17 @@ Notable changes to games-platform-api. The format follows
 [SemVer](https://semver.org/); before 1.0.0 a minor version may break the
 contract.
 
+## Unreleased
+
+### Added
+
+- `PlatformFriends` and `PlatformPresence`: the platform keeps friendships, who
+  is online and who may see whom; games ask it, for example to offer people to
+  invite. A game started on its own provides its own implementation.
+- `MatchDirectory.invitationsOf(AccountId)` with `MatchInvitation`: the open
+  invitations of an account, so that the platform can list them. A default
+  method that lists none, so existing games keep compiling.
+
 ## 0.1.0 - 2026-11-15
 
 ### Added

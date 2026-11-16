@@ -39,6 +39,11 @@ class MatchDirectoryTest {
     }
 
     @Test
+    void aGameWithoutInvitationsListsNone() {
+        assertThat(directory.invitationsOf(ALICE)).isEmpty();
+    }
+
+    @Test
     void answersForItsOwnGameOnly() {
         assertThat(directory.matchesOf(BOB)).extracting(MatchSummary::gameKey).containsOnly(directory.gameKey());
     }

@@ -30,7 +30,10 @@ All in the package `de.zettsystems.gamesplatformapi`.
 | `AccountId` | The platform account of a person (a positive `long` id). |
 | `MatchStatus` | `OPEN` (waiting for players), `RUNNING`, `FINISHED`. |
 | `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats and how many of them computer opponents take, who is to move, last change, path of the match view. |
-| `MatchDirectory` | Implemented by every game: the matches of an account and the open matches a viewer could join. |
+| `MatchDirectory` | Implemented by every game: the matches of an account, the open matches a viewer could join and, since 0.2.0, the account's open invitations (default: none). |
+| `MatchInvitation` | An invitation to a match for one account: the match and who invited. Accepting and declining happen in the game. |
+| `PlatformFriends` | Implemented by the platform (since 0.2.0): an account's friends and whether two accounts are friends or blocked. |
+| `PlatformPresence` | Implemented by the platform (since 0.2.0): who is online and who may see whom, always for a viewer. |
 | `MatchChanged` | Event: something the lobby shows has changed (join, leave, start, turn, title). Carries no summary; the platform asks the `MatchDirectory` again. |
 | `MatchEnded` | Event: a match has ended, with a `MatchResult`. |
 | `MatchResult` | Sealed: `Ranked` (a `Placement` per participant) or `Aborted` (the participants, no places). |

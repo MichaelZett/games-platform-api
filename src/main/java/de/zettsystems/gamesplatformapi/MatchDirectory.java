@@ -27,4 +27,15 @@ public interface MatchDirectory {
      * the viewer already takes part in are listed by {@link #matchesOf(AccountId)}.
      */
     List<MatchSummary> openMatches(AccountId viewer);
+
+    /**
+     * The open invitations of the account: matches someone invited it to that it has neither
+     * accepted nor declined yet, most recently changed first. A game without invitations keeps the
+     * default, which lists none.
+     *
+     * @since 0.2.0
+     */
+    default List<MatchInvitation> invitationsOf(AccountId account) {
+        return List.of();
+    }
 }
