@@ -5,8 +5,20 @@ Notable changes to games-platform-api. The format follows
 [SemVer](https://semver.org/); before 1.0.0 a minor version may break the
 contract.
 
-## 0.2.0 - 2026-11-16
+## 0.3.0 - 2026-11-17
 
+### Added
+
+- `PlatformAccounts`: who is signed in, the public display names of accounts and
+  whether an account is a tester of a game (or a system administrator). The
+  platform is the only place that knows how people sign in; a game started on
+  its own provides its own implementation, for example one default account
+  without sign-in. Games no longer need the identity building block.
+- `AccountRemoved`: an account was deleted; published synchronously within the
+  deleting transaction, so that games remove what belongs to it in the same
+  transaction.
+
+## 0.2.0 - 2026-11-16
 ### Added
 
 - `PlatformFriends` and `PlatformPresence`: the platform keeps friendships, who
