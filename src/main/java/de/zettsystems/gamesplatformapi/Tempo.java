@@ -3,8 +3,9 @@ package de.zettsystems.gamesplatformapi;
 /**
  * How fast a match with several people runs: the platform names the levels the same for all games,
  * each game sets the time a turn may take for each level it offers and enforces it. The tempo is
- * chosen when the match is created and does not change while it runs. A match with only one person
- * has no tempo.
+ * chosen when the match is created and does not change while it runs; neither does the time per
+ * turn the game sets for it, so nobody changes the deadlines of a running match with a tempo. A
+ * match with only one person has no tempo.
  *
  * <p>The usual time per turn is given for each level; a game may deviate where a turn needs more or
  * less work. Further levels may follow in a later minor version, so a {@code switch} over the

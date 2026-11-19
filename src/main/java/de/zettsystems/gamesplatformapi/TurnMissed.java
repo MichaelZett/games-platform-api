@@ -5,10 +5,11 @@ import java.util.Objects;
 
 /**
  * An account missed a turn: the deadline of a {@linkplain DecisionKind#TURN turn} passed without
- * the account having moved. The rule is the same for all games: the first missed turn in a match
- * is forfeited and the match goes on; the second one in the same match, whether in a row or not,
- * removes the account, and a computer opponent takes over its seat. The platform tells the account,
- * on the platform and by mail. Answers to requests of others never count as missed.
+ * the account having finished it. The turn ends as it stands: whatever the account ordered until
+ * then counts, nothing more. The rule is the same for all games: after the first missed turn in a
+ * match the match goes on with the account; the second one in the same match, whether in a row or
+ * not, removes the account, and a computer opponent takes over its seat. The platform tells the
+ * account, on the platform and by mail. Answers to requests of others never count as missed.
  *
  * <p>The game publishes this event once per missed turn, in addition to the {@link MatchChanged}
  * for the same change, within the transaction that settles the turn or after it is stored if the

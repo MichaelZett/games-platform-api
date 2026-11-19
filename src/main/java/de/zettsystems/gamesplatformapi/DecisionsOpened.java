@@ -11,7 +11,7 @@ import java.util.Objects;
  * already be made by the time a listener could ask the game.
  *
  * <p>The game publishes this event, in addition to the {@link MatchChanged} for the same change,
- * when decisions open, and again for a decision whose deadline moved forward or that got its
+ * when decisions open, and again for a decision whose deadline became earlier or that got its
  * deadline back after waiting for answers of others. The platform keeps one notice per account,
  * match, decision id and kind, so publishing a decision again does not notify twice; it only plans
  * the reminder anew. The same publication rules apply as for {@link MatchChanged}: within the

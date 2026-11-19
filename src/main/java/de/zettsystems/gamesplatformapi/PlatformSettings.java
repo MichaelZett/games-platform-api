@@ -13,10 +13,11 @@ import java.util.Optional;
  *
  * <p>The account is always the one signed in for the current request or UI session, never a
  * parameter. Calls outside a request or UI session, such as background threads or computer moves,
- * have no account: reading gives nothing and writing throws. A game therefore reads its settings
- * while it builds a view. The game decides what keys mean, which values are allowed and what applies when a key
- * has no value; it falls back to its default for a value it does not understand. Deleting an
- * account deletes its settings.
+ * have no account: reading gives nothing and writing throws. Whether work that another thread hands
+ * to a UI session (a push) knows the account is up to the platform; a game does not rely on it. A
+ * game therefore reads its settings while it builds a view. The game decides what keys mean, which
+ * values are allowed and what applies when a key has no value; it falls back to its default for a
+ * value it does not understand. Deleting an account deletes its settings.
  *
  * <p>Keys are at most {@value #MAX_KEY_LENGTH} and values at most {@value #MAX_VALUE_LENGTH}
  * characters long, neither may be blank; an implementation rejects others with an

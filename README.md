@@ -32,7 +32,7 @@ All in the package `de.zettsystems.gamesplatformapi`.
 | `MatchStatus` | `OPEN` (waiting for players), `RUNNING`, `FINISHED`. |
 | `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats and how many of them computer opponents take, who is to move, last change, path of the match view; since 0.4.0 also whether it is a tutorial, its `Tempo` and its pending decisions. |
 | `Tempo` | How fast a match with several people runs: `LIVE`, `BRISK`, `DAILY`, `RELAXED` (since 0.4.0). Chosen when the match is created; the game sets and enforces the time per turn. |
-| `PendingDecision` | A decision a running match waits for from one account: a stable id, `DecisionKind` `TURN` or `ANSWER`, an optional deadline that only moves forward (since 0.4.0). |
+| `PendingDecision` | A decision a running match waits for from one account: a stable id, `DecisionKind` `TURN` or `ANSWER`, an optional deadline that only ever becomes earlier (since 0.4.0). |
 | `MatchDirectory` | Implemented by every game: the matches of an account, the open matches a viewer could join, the account's open invitations (since 0.2.0), its finished matches page by page and what an account may do in a match's chat (since 0.4.0). The later ones are default methods. |
 | `MatchInvitation` | An invitation to a match for one account: the match and who invited. Accepting and declining happen in the game. |
 | `FinishedMatch` | A finished match in an account's archive: title, end, result, tutorial, path of the review (since 0.4.0). |
@@ -135,7 +135,7 @@ A game announces the end of a match once, even if it lets the match go on.
   participant.
 - Publish `MatchStarted`, `InvitationSent`, `DecisionsOpened` and `TurnMissed`
   in addition to `MatchChanged`. Publish `DecisionsOpened` again when a
-  deadline moves forward; the platform keeps one notice per account, match,
+  deadline becomes earlier; the platform keeps one notice per account, match,
   decision id and kind.
 - Decision ids stay the same while a decision is open and survive restarts;
   partial actions within a turn neither create a new decision nor reset its

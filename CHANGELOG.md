@@ -15,7 +15,8 @@ Draft, tried out locally with the platform and its games before it is released.
   platform marks tutorials and keeps them out of competition statistics.
 - Tempo and deadlines: `Tempo` (`LIVE`, `BRISK`, `DAILY`, `RELAXED`) and the pending decisions of a
   running match in `MatchSummary.pendingDecisions`, each a `PendingDecision` with account, stable
-  id, `DecisionKind` (`TURN` or `ANSWER`) and an optional deadline that only moves forward.
+  id, `DecisionKind` (`TURN` or `ANSWER`) and an optional deadline that only
+  ever becomes earlier.
 - `Departure.TIMED_OUT`: removed for missing turns; the place is the one held at the removal.
 - Events for notices and reminders, carrying what the platform needs without asking the game
   later: `MatchStarted`, `InvitationSent`, `DecisionsOpened` and `TurnMissed` (how many turns the

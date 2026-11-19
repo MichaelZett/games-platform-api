@@ -17,10 +17,10 @@ import java.util.Optional;
  * neither create a new decision nor reset its deadline. It is not derived from a version counter,
  * a change time or the account alone; {@code round-12} or {@code year-3-phase-2-seat-1} are good ids.
  *
- * <p>The deadline only ever moves forward, for example when a game shortens the time left because
- * everyone else has finished. One exception: while the account's turn waits for answers of others,
- * its time stands still; the game reports the decision without a deadline meanwhile and with the
- * deadline from the remaining time afterwards.
+ * <p>The deadline only ever becomes earlier, never later, for example when a game shortens the time
+ * left because everyone else has finished. One exception: while the account's turn waits for
+ * answers of others, its time stands still; the game reports the decision without a deadline
+ * meanwhile and with the deadline from the remaining time afterwards.
  *
  * @param account    the account the match waits for
  * @param decisionId the game's id of the decision, unique within the match and account, at most
