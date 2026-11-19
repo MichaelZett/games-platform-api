@@ -78,6 +78,16 @@ class MatchResultTest {
         }
 
         @Test
+        void answersThePlacementOfAnAccountRemovedForMissingTurns() {
+            Placement removed = new Placement(BOB, 2, Departure.TIMED_OUT);
+            MatchResult result = MatchResult.ranked(List.of(new Placement(ALICE, 1), removed));
+
+            assertThat(result.placementOf(BOB)).contains(removed);
+            assertThat(result.placementOf(CAROL)).isEmpty();
+            assertThat(result.winners()).containsExactly(ALICE);
+        }
+
+        @Test
         void freezesThePlacements() {
             List<Placement> placements = new ArrayList<>(List.of(new Placement(ALICE, 1)));
             MatchResult.Ranked ranked = MatchResult.ranked(placements);
@@ -160,6 +170,7 @@ class MatchResultTest {
             assertThat(result.participants()).containsExactly(BOB, ALICE);
             assertThat(result.winners()).isEmpty();
             assertThat(result.placeOf(ALICE)).isEmpty();
+            assertThat(result.placementOf(ALICE)).isEmpty();
         }
 
         @Test

@@ -9,6 +9,8 @@
             <Class name="de.zettsystems.gamesplatformapi.MatchSummary"/>
             <Class name="de.zettsystems.gamesplatformapi.MatchResult$Ranked"/>
             <Class name="de.zettsystems.gamesplatformapi.MatchResult$Aborted"/>
+            <Class name="de.zettsystems.gamesplatformapi.MatchStarted"/>
+            <Class name="de.zettsystems.gamesplatformapi.DecisionsOpened"/>
         </Or>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>

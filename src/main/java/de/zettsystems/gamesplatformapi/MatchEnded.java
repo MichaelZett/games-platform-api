@@ -13,18 +13,29 @@ import java.util.OptionalInt;
  * {@code fallbackExecution = true}). The game does not publish a {@link MatchChanged} for the end
  * in addition, and it does not announce a second end if it lets the match go on afterwards.
  *
- * @param gameKey the key of the game, as in its game descriptor
- * @param matchId the game's id of the match, unique within the game
- * @param endedAt when the match ended
- * @param result  the ranking of the participants, or that the match was aborted
+ * <p>A tutorial ends like any other match, marked as {@code tutorial}; the platform lists it among
+ * the finished matches but keeps it out of competition statistics. A platform built against a
+ * version before 0.4.0 does not know the mark and would count the match, so a game reports the end
+ * of tutorials only once the platform it runs in understands it.
+ *
+ * @param gameKey  the key of the game, as in its game descriptor
+ * @param matchId  the game's id of the match, unique within the game
+ * @param endedAt  when the match ended
+ * @param result   the ranking of the participants, or that the match was aborted
+ * @param tutorial whether the match was a tutorial (since 0.4.0)
  */
-public record MatchEnded(String gameKey, String matchId, Instant endedAt, MatchResult result) {
+public record MatchEnded(String gameKey, String matchId, Instant endedAt, MatchResult result, boolean tutorial) {
 
     public MatchEnded {
         Checks.gameKey(gameKey);
         Checks.text(matchId, "matchId");
         Objects.requireNonNull(endedAt, "endedAt");
         Objects.requireNonNull(result, "result");
+    }
+
+    /** The end of a match that was not a tutorial. */
+    public MatchEnded(String gameKey, String matchId, Instant endedAt, MatchResult result) {
+        this(gameKey, matchId, endedAt, result, false);
     }
 
     /** Whether the match ended without a result. */

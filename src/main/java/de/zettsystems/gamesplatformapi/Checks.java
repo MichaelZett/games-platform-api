@@ -45,6 +45,18 @@ final class Checks {
     }
 
     /**
+     * Copies the decisions unmodifiably and rejects null elements and two entries for the same
+     * decision of the same account.
+     */
+    static List<PendingDecision> decisions(List<PendingDecision> decisions, String name) {
+        Objects.requireNonNull(decisions, name);
+        List<PendingDecision> copy = List.copyOf(decisions);
+        distinct(copy.stream().map(decision -> List.of(decision.account(), decision.decisionId())).toList(),
+                name + " (account and decisionId)");
+        return copy;
+    }
+
+    /**
      * A path inside the platform that leads into the game's own area: it starts with
      * {@code /<gameKey>/}, carries no scheme or host and no {@code .}, {@code ..} or empty
      * segments. That keeps a game from linking into another game or off the platform.

@@ -44,6 +44,16 @@ class MatchDirectoryTest {
     }
 
     @Test
+    void aGameWithoutAnArchiveListsNoFinishedMatches() {
+        assertThat(directory.finishedMatchesOf(ALICE, 0, 20)).isEmpty();
+    }
+
+    @Test
+    void aGameWithoutChatAllowsNothing() {
+        assertThat(directory.chatAccess("1", ALICE)).isEqualTo(ChatAccess.NONE);
+    }
+
+    @Test
     void answersForItsOwnGameOnly() {
         assertThat(directory.matchesOf(BOB)).extracting(MatchSummary::gameKey).containsOnly(directory.gameKey());
     }

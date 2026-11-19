@@ -3,6 +3,7 @@ package de.zettsystems.gamesplatformapi;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
@@ -23,6 +24,14 @@ public sealed interface MatchResult permits MatchResult.Ranked, MatchResult.Abor
 
     /** The place of the account, or empty if it did not take part or the match was aborted. */
     OptionalInt placeOf(AccountId account);
+
+    /**
+     * The placement of the account with its departure, or empty if it did not take part or the
+     * match was aborted.
+     *
+     * @since 0.4.0
+     */
+    Optional<Placement> placementOf(AccountId account);
 
     /** Shorthand for {@code new Ranked(placements)}. */
     static Ranked ranked(List<Placement> placements) {
@@ -83,10 +92,12 @@ public sealed interface MatchResult permits MatchResult.Ranked, MatchResult.Abor
 
         @Override
         public OptionalInt placeOf(AccountId account) {
-            return placements.stream()
-                    .filter(placement -> placement.account().equals(account))
-                    .mapToInt(Placement::place)
-                    .findFirst();
+            return placementOf(account).map(placement -> OptionalInt.of(placement.place())).orElse(OptionalInt.empty());
+        }
+
+        @Override
+        public Optional<Placement> placementOf(AccountId account) {
+            return placements.stream().filter(placement -> placement.account().equals(account)).findFirst();
         }
     }
 
@@ -114,6 +125,11 @@ public sealed interface MatchResult permits MatchResult.Ranked, MatchResult.Abor
         @Override
         public OptionalInt placeOf(AccountId account) {
             return OptionalInt.empty();
+        }
+
+        @Override
+        public Optional<Placement> placementOf(AccountId account) {
+            return Optional.empty();
         }
     }
 }

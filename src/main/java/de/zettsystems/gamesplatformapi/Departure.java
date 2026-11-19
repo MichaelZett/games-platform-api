@@ -13,5 +13,14 @@ public enum Departure {
     RESIGNED,
 
     /** Was knocked out by the course of the game. */
-    ELIMINATED
+    ELIMINATED,
+
+    /**
+     * Was removed for missing turns; a computer opponent took over the seat. The place is the one
+     * the account held when it was removed, stored by the game at that moment: if the computer
+     * opponent goes on to win with the same seat, that is not a win of the removed account.
+     *
+     * @since 0.4.0
+     */
+    TIMED_OUT
 }

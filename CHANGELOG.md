@@ -5,6 +5,37 @@ Notable changes to games-platform-api. The format follows
 [SemVer](https://semver.org/); before 1.0.0 a minor version may break the
 contract.
 
+## 0.4.0 - unreleased
+
+Draft, tried out locally with the platform and its games before it is released.
+
+### Added
+
+- Tutorials: `MatchSummary.tutorial`, `MatchEnded.tutorial` and `FinishedMatch.tutorial`. The
+  platform marks tutorials and keeps them out of competition statistics.
+- Tempo and deadlines: `Tempo` (`LIVE`, `BRISK`, `DAILY`, `RELAXED`) and the pending decisions of a
+  running match in `MatchSummary.pendingDecisions`, each a `PendingDecision` with account, stable
+  id, `DecisionKind` (`TURN` or `ANSWER`) and an optional deadline that only moves forward.
+- `Departure.TIMED_OUT`: removed for missing turns; the place is the one held at the removal.
+- Events for notices and reminders, carrying what the platform needs without asking the game
+  later: `MatchStarted`, `InvitationSent`, `DecisionsOpened` and `TurnMissed` (how many turns the
+  account has missed, and whether this one removed it).
+- Archive: `MatchDirectory.finishedMatchesOf(account, offset, limit)` lists the account's finished
+  matches as `FinishedMatch`, latest first; `MatchResult.placementOf(account)` gives the placement
+  with its departure.
+- Match chat kept by the platform: `MatchDirectory.chatAccess(matchId, account)` answers with
+  `ChatAccess` (`NONE`, `READ`, `WRITE`); a view showing a match implements `MatchView`.
+- `PlatformSettings`: the signed-in account's settings per game, kept by the platform across
+  devices.
+
+### Compatibility
+
+- `MatchSummary` and `MatchEnded` keep their earlier constructors, which leave the new values empty.
+  New `MatchDirectory` methods are default methods (no finished matches, no chat).
+- New constants in `Departure` break an exhaustive `switch` over it without a `default` branch; the
+  same holds for the new enums `Tempo`, `DecisionKind` and `ChatAccess` in later versions.
+- `MatchResult` has a new abstract method; it is sealed, so only this library implements it.
+
 ## 0.3.0 - 2026-11-17
 
 ### Added

@@ -38,4 +38,35 @@ public interface MatchDirectory {
     default List<MatchInvitation> invitationsOf(AccountId account) {
         return List.of();
     }
+
+    /**
+     * One page of the finished matches the account took part in, including those it left early
+     * (resigned, eliminated, removed for missing turns) and tutorials; matches cancelled before they
+     * started are not among them. Sorted by {@link FinishedMatch#endedAt()}, latest first, and by
+     * match id where two ended at the same time, so that pages neither overlap nor skip a match. A
+     * match whose state the game has deleted is no longer listed. A game without finished matches
+     * to show keeps the default, which lists none.
+     *
+     * @param account the account whose matches are listed
+     * @param offset  how many matches to skip, at least 0
+     * @param limit   how many matches to list at most, at least 1
+     * @since 0.4.0
+     */
+    default List<FinishedMatch> finishedMatchesOf(AccountId account, int offset, int limit) {
+        return List.of();
+    }
+
+    /**
+     * What the account may do in the chat of the match, decided anew on every call from the state of
+     * the match and the account's part in it (see {@link ChatAccess} for the usual rules). An unknown
+     * match gives {@link ChatAccess#NONE}. A game that does not offer a chat keeps the default, which
+     * allows nothing.
+     *
+     * @param matchId the game's id of the match
+     * @param account the account that wants to read or write
+     * @since 0.4.0
+     */
+    default ChatAccess chatAccess(String matchId, AccountId account) {
+        return ChatAccess.NONE;
+    }
 }

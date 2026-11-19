@@ -28,6 +28,12 @@ class MatchEndedTest {
     }
 
     @Test
+    void isNoTutorialUnlessMarked() {
+        assertThat(new MatchEnded("starfare", "42", ENDED, RANKED).tutorial()).isFalse();
+        assertThat(new MatchEnded("frontier-lords", "7", ENDED, RANKED, true).tutorial()).isTrue();
+    }
+
+    @Test
     void answersFromARankedResult() {
         MatchEnded ended = new MatchEnded("starfare", "42", ENDED, RANKED);
 

@@ -18,8 +18,9 @@ match. This library defines the shared types.
   missing value throws a `NullPointerException` naming the field, an invalid
   one an `IllegalArgumentException`.
 
-Status: `0.1.0` on Maven Central. Before 1.0.0 a minor version may break the
-contract; the changelog says what changed.
+Status: `0.3.0` on Maven Central; `0.4.0` is a draft that the platform and its
+games try out locally before it is released. Before 1.0.0 a minor version may
+break the contract; the changelog says what changed.
 
 ## Types
 
@@ -29,15 +30,24 @@ All in the package `de.zettsystems.gamesplatformapi`.
 |---|---|
 | `AccountId` | The platform account of a person (a positive `long` id). |
 | `MatchStatus` | `OPEN` (waiting for players), `RUNNING`, `FINISHED`. |
-| `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats and how many of them computer opponents take, who is to move, last change, path of the match view. |
-| `MatchDirectory` | Implemented by every game: the matches of an account, the open matches a viewer could join and, since 0.2.0, the account's open invitations (default: none). |
+| `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats and how many of them computer opponents take, who is to move, last change, path of the match view; since 0.4.0 also whether it is a tutorial, its `Tempo` and its pending decisions. |
+| `Tempo` | How fast a match with several people runs: `LIVE`, `BRISK`, `DAILY`, `RELAXED` (since 0.4.0). Chosen when the match is created; the game sets and enforces the time per turn. |
+| `PendingDecision` | A decision a running match waits for from one account: a stable id, `DecisionKind` `TURN` or `ANSWER`, an optional deadline that only moves forward (since 0.4.0). |
+| `MatchDirectory` | Implemented by every game: the matches of an account, the open matches a viewer could join, the account's open invitations (since 0.2.0), its finished matches page by page and what an account may do in a match's chat (since 0.4.0). The later ones are default methods. |
 | `MatchInvitation` | An invitation to a match for one account: the match and who invited. Accepting and declining happen in the game. |
+| `FinishedMatch` | A finished match in an account's archive: title, end, result, tutorial, path of the review (since 0.4.0). |
+| `ChatAccess` | `NONE`, `READ` or `WRITE`: what an account may do in a match's chat; the game decides, the platform keeps and shows the chat (since 0.4.0). |
+| `MatchView` | Implemented by a game's view that shows one match: which match it shows, or none (since 0.4.0). |
+| `PlatformAccounts` | Implemented by the platform (since 0.3.0): who is signed in, display names, testers of a game. |
 | `PlatformFriends` | Implemented by the platform (since 0.2.0): an account's friends and whether two accounts are friends or blocked. |
 | `PlatformPresence` | Implemented by the platform (since 0.2.0): who is online and who may see whom, always for a viewer. |
+| `PlatformSettings` | Implemented by the platform (since 0.4.0): the signed-in account's settings per game, across devices. |
 | `MatchChanged` | Event: something the lobby shows has changed (join, leave, start, turn, title). Carries no summary; the platform asks the `MatchDirectory` again. |
-| `MatchEnded` | Event: a match has ended, with a `MatchResult`. |
+| `MatchStarted`, `InvitationSent`, `DecisionsOpened`, `TurnMissed` | Events for notices and reminders (since 0.4.0), published in addition to `MatchChanged`. They carry what a notice needs, because the match may have moved on by the time the platform could ask. |
+| `MatchEnded` | Event: a match has ended, with a `MatchResult`; since 0.4.0 marked as tutorial where it was one. |
+| `AccountRemoved` | Event from the platform (since 0.3.0): an account was deleted; games remove its data in the same transaction. |
 | `MatchResult` | Sealed: `Ranked` (a `Placement` per participant) or `Aborted` (the participants, no places). |
-| `Placement` | The place of an account; 1 is best, ties share a place (1, 1, 3), computer opponents count but are not listed. A `Departure` marks players who resigned or were eliminated; it does not change the place. |
+| `Placement` | The place of an account; 1 is best, ties share a place (1, 1, 3), computer opponents count but are not listed. A `Departure` marks players who resigned, were eliminated or, since 0.4.0, removed for missing turns (`TIMED_OUT`, with the place held at the removal); it does not change the place. |
 
 Rules the records check:
 
@@ -50,7 +60,10 @@ Rules the records check:
   one). Participants never outnumber the seats for people, and `freeSeats()`
   counts only those. `openMatches` lists only joinable matches: open, with a
   free seat.
-- Only participants can be to move, and only in a running match.
+- Only participants can be to move, and only in a running match. When a game
+  reports pending decisions, every account to move has at least one; a decision
+  belongs to a participant and appears once per account and id.
+- Only a match with at least two seats for people has a tempo.
 - A ranked result follows competition ranking (1, 1, 3) and names every account
   exactly once. Computer opponents count as players but are not listed, so the
   places of the accounts may skip theirs (an account on place 2 lost to a
@@ -66,7 +79,7 @@ Dependency from Maven Central:
 
 ```groovy
 dependencies {
-    implementation 'de.zettsystems:games-platform-api:0.1.0'
+    implementation 'de.zettsystems:games-platform-api:0.3.0'
 }
 ```
 
@@ -112,6 +125,32 @@ game published the event outside a transaction (a game that keeps its state
 outside the database transaction publishes once the change is stored). In
 Spring that is a `@TransactionalEventListener` with `fallbackExecution = true`.
 A game announces the end of a match once, even if it lets the match go on.
+
+### Rules for games
+
+- One `MatchDirectory` per game. The platform calls it often (every lobby
+  visit, after every `MatchChanged`), so answer from stored data.
+- Publish `MatchChanged` for every change the lobby shows, but not for the
+  end; the end is `MatchEnded` alone. An aborted match names at least one
+  participant.
+- Publish `MatchStarted`, `InvitationSent`, `DecisionsOpened` and `TurnMissed`
+  in addition to `MatchChanged`. Publish `DecisionsOpened` again when a
+  deadline moves forward; the platform keeps one notice per account, match,
+  decision id and kind.
+- Decision ids stay the same while a decision is open and survive restarts;
+  partial actions within a turn neither create a new decision nor reset its
+  deadline. Report `toMove` and the pending decisions from the same source.
+- Only a missed `TURN` counts. The second missed turn in a match removes the
+  account (`TurnMissed.removed`); a computer opponent takes over, and the end
+  reports the account with `Departure.TIMED_OUT` and the place it held then.
+- The chat belongs to the platform; the game answers `chatAccess` from the
+  current state on every call. A view that shows a match implements
+  `MatchView` and returns no match when the match is invalid or not
+  accessible.
+- Read and write settings only through `PlatformSettings`; the account always
+  comes from the session.
+- Report the end of tutorials (`MatchEnded.tutorial`) only to a platform built
+  against 0.4.0 or later; an older one would count them in its statistics.
 
 ## Building
 
