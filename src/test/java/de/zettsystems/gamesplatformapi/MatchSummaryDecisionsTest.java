@@ -127,15 +127,12 @@ class MatchSummaryDecisionsTest {
     }
 
     @Test
-    void aMatchWithOneSeatForAPersonHasNoTempo() {
-        List<AccountId> alice = List.of(ALICE);
-        List<AccountId> nobody = List.of();
-        List<PendingDecision> none = List.of();
+    void keepsTheTempoWhenOnlyOnePersonRemains() {
+        MatchSummary summary = new MatchSummary("frontier-lords", "17", "Taken over", MatchStatus.RUNNING,
+                List.of(ALICE), 4, 3, List.of(), NOW, "/frontier-lords/game/17", false, Tempo.DAILY, List.of());
 
-        assertThatThrownBy(() -> new MatchSummary("starfare", "42", "Solo", MatchStatus.OPEN, alice, 4, 3, nobody,
-                NOW, "/starfare/game/42", false, Tempo.LIVE, none))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("only a match with at least two seats for people has a tempo, but it has 1");
+        assertThat(summary.humanSeats()).isEqualTo(1);
+        assertThat(summary.tempo()).isEqualTo(Tempo.DAILY);
     }
 
     @Test

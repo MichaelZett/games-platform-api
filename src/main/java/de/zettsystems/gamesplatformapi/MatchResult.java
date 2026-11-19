@@ -51,7 +51,9 @@ public sealed interface MatchResult permits MatchResult.Ranked, MatchResult.Abor
      * but are not listed, so the places of the accounts may skip theirs: if a computer opponent
      * wins, the best account is on place 2, and nobody of the listed accounts {@linkplain
      * #winners() won}. The placements are kept sorted by place; accounts that share a place stay
-     * in the order they were given.
+     * in the order they were given. An account {@linkplain Departure#TIMED_OUT removed for missing
+     * turns} keeps the place it held at the removal; that place is not checked against the ranking
+     * of the others, and it never counts as a win.
      *
      * @param placements one placement per participant, at least one
      */
@@ -64,9 +66,11 @@ public sealed interface MatchResult permits MatchResult.Ranked, MatchResult.Abor
                 throw new IllegalArgumentException("a ranked result has at least one placement");
             }
             Checks.distinct(placements.stream().map(Placement::account).toList(), "placements' accounts");
-            checkRanking(placements);
+            checkRanking(placements.stream().filter(placement -> placement.departure() != Departure.TIMED_OUT)
+                    .toList());
         }
 
+        // Places of accounts removed for missing turns were frozen at the removal and are left out.
         // Unlisted computer opponents may take any place in between, so a place can be higher than
         // its rank among the accounts, but never lower: i accounts before it are strictly better.
         private static void checkRanking(List<Placement> sorted) {

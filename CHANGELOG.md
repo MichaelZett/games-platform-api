@@ -17,7 +17,8 @@ Draft, tried out locally with the platform and its games before it is released.
   running match in `MatchSummary.pendingDecisions`, each a `PendingDecision` with account, stable
   id, `DecisionKind` (`TURN` or `ANSWER`) and an optional deadline that only
   ever becomes earlier.
-- `Departure.TIMED_OUT`: removed for missing turns; the place is the one held at the removal.
+- `Departure.TIMED_OUT`: removed for missing turns; the place is the one held at the removal, it is
+  not checked against the ranking of the others and never counts as a win (`Placement.isWin()`).
 - Events for notices and reminders, carrying what the platform needs without asking the game
   later: `MatchStarted`, `InvitationSent`, `DecisionsOpened` and `TurnMissed` (how many turns the
   account has missed, and whether this one removed it).

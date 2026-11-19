@@ -78,6 +78,34 @@ class MatchResultTest {
         }
 
         @Test
+        void anAccountRemovedWhileLeadingIsNoWinner() {
+            MatchResult result = MatchResult.ranked(List.of(new Placement(ALICE, 1, Departure.TIMED_OUT)));
+
+            assertThat(result.winners()).isEmpty();
+            assertThat(result.placeOf(ALICE)).hasValue(1);
+        }
+
+        @Test
+        void leavesTheFrozenPlaceOfARemovedAccountOutOfTheRankingCheck() {
+            // Alice led when she was removed; afterwards Bob won and Carol came second.
+            MatchResult result = MatchResult.ranked(List.of(new Placement(ALICE, 1, Departure.TIMED_OUT),
+                    new Placement(BOB, 1), new Placement(CAROL, 2)));
+
+            assertThat(result.winners()).containsExactly(BOB);
+            assertThat(result.placeOf(CAROL)).hasValue(2);
+        }
+
+        @Test
+        void stillChecksTheRankingOfTheOthers() {
+            List<Placement> placements = List.of(new Placement(ALICE, 3, Departure.TIMED_OUT), new Placement(BOB, 1),
+                    new Placement(CAROL, 1), new Placement(DAVE, 2));
+
+            assertThatThrownBy(() -> MatchResult.ranked(placements))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("competition ranking");
+        }
+
+        @Test
         void answersThePlacementOfAnAccountRemovedForMissingTurns() {
             Placement removed = new Placement(BOB, 2, Departure.TIMED_OUT);
             MatchResult result = MatchResult.ranked(List.of(new Placement(ALICE, 1), removed));

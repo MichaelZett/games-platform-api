@@ -36,6 +36,14 @@ class PlacementTest {
     }
 
     @Test
+    void anAccountRemovedForMissingTurnsNeverWins() {
+        Placement placement = new Placement(ALICE, 1, Departure.TIMED_OUT);
+
+        assertThat(placement.isWin()).isFalse();
+        assertThat(placement.place()).isEqualTo(1);
+    }
+
+    @Test
     void rejectsPlaceZero() {
         assertThatThrownBy(() -> new Placement(ALICE, 0))
                 .isInstanceOf(IllegalArgumentException.class)

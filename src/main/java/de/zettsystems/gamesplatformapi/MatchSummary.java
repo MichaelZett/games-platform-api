@@ -26,8 +26,10 @@ import java.util.Optional;
  *                         for example {@code /starfare/game/42}
  * @param tutorial         whether the match is a tutorial; the platform marks it as such and keeps it
  *                         out of competition statistics
- * @param tempo            how fast the match runs, chosen when it was created; {@code null} for a match
- *                         without a tempo, which is every match with only one seat for a person
+ * @param tempo            how fast the match runs, chosen when it was created for several people;
+ *                         {@code null} for a match without a tempo. It stays when only one person
+ *                         remains, for example after a computer opponent took over a seat; the
+ *                         deadlines end then, not the tempo.
  * @param pendingDecisions the decisions the running match waits for, from the same source as
  *                         {@code toMove}: every account to move has at least one, and every entry
  *                         belongs to a participant. Empty for a game that does not report them; then
@@ -61,10 +63,6 @@ public record MatchSummary(
         pendingDecisions = Checks.decisions(pendingDecisions, "pendingDecisions");
         checkSeats(seats, computerSeats, participants.size());
         checkMoves(status, participants, toMove, pendingDecisions);
-        if (tempo != null && seats - computerSeats < 2) {
-            throw new IllegalArgumentException("only a match with at least two seats for people has a tempo, but it has "
-                    + (seats - computerSeats));
-        }
     }
 
     /**

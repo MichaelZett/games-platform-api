@@ -47,7 +47,7 @@ All in the package `de.zettsystems.gamesplatformapi`.
 | `MatchEnded` | Event: a match has ended, with a `MatchResult`; since 0.4.0 marked as tutorial where it was one. |
 | `AccountRemoved` | Event from the platform (since 0.3.0): an account was deleted; games remove its data in the same transaction. |
 | `MatchResult` | Sealed: `Ranked` (a `Placement` per participant) or `Aborted` (the participants, no places). |
-| `Placement` | The place of an account; 1 is best, ties share a place (1, 1, 3), computer opponents count but are not listed. A `Departure` marks players who resigned, were eliminated or, since 0.4.0, removed for missing turns (`TIMED_OUT`, with the place held at the removal); it does not change the place. |
+| `Placement` | The place of an account; 1 is best, ties share a place (1, 1, 3), computer opponents count but are not listed. A `Departure` marks players who resigned, were eliminated or, since 0.4.0, removed for missing turns (`TIMED_OUT`, with the place held at the removal, never a win); it does not change the place. |
 
 Rules the records check:
 
@@ -63,11 +63,12 @@ Rules the records check:
 - Only participants can be to move, and only in a running match. When a game
   reports pending decisions, every account to move has at least one; a decision
   belongs to a participant and appears once per account and id.
-- Only a match with at least two seats for people has a tempo.
 - A ranked result follows competition ranking (1, 1, 3) and names every account
   exactly once. Computer opponents count as players but are not listed, so the
   places of the accounts may skip theirs (an account on place 2 lost to a
-  computer opponent); an aborted match names at least one participant.
+  computer opponent); an aborted match names at least one participant. An
+  account removed for missing turns keeps the place it held then; that place is
+  not checked against the others, and it is never a win.
 
 `MatchResult` may gain further cases in a later minor version. Prefer its
 methods (`participants()`, `winners()`, `placeOf(..)`), and give a `switch` over

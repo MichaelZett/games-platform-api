@@ -27,8 +27,12 @@ public record Placement(AccountId account, int place, Departure departure) {
         this(account, place, Departure.NONE);
     }
 
-    /** Whether this account won, alone or together with others. Decided by the place alone. */
+    /**
+     * Whether this account won, alone or together with others: it is on place 1 and was not
+     * {@linkplain Departure#TIMED_OUT removed for missing turns}. A removed account loses even if it
+     * led when it was removed.
+     */
     public boolean isWin() {
-        return place == 1;
+        return place == 1 && departure != Departure.TIMED_OUT;
     }
 }

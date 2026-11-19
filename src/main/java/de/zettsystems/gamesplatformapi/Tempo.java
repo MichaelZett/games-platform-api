@@ -5,7 +5,8 @@ package de.zettsystems.gamesplatformapi;
  * each game sets the time a turn may take for each level it offers and enforces it. The tempo is
  * chosen when the match is created and does not change while it runs; neither does the time per
  * turn the game sets for it, so nobody changes the deadlines of a running match with a tempo. A
- * match with only one person has no tempo.
+ * match created for only one person has no tempo. A match that later keeps only one person, for
+ * example after a computer opponent took over a seat, keeps its tempo but has no deadlines any more.
  *
  * <p>The usual time per turn is given for each level; a game may deviate where a turn needs more or
  * less work. Further levels may follow in a later minor version, so a {@code switch} over the

@@ -43,9 +43,10 @@ public interface MatchDirectory {
      * One page of the finished matches the account took part in, including those it left early
      * (resigned, eliminated, removed for missing turns) and tutorials; matches cancelled before they
      * started are not among them. Sorted by {@link FinishedMatch#endedAt()}, latest first, and by
-     * match id where two ended at the same time, so that pages neither overlap nor skip a match. A
-     * match whose state the game has deleted is no longer listed. A game without finished matches
-     * to show keeps the default, which lists none.
+     * match id where two ended at the same time, so that pages neither overlap nor skip a match as
+     * long as the list does not change in between; a match that ends or disappears meanwhile shifts
+     * the later pages. A match whose state the game has deleted is no longer listed. A game without
+     * finished matches to show keeps the default, which lists none.
      *
      * @param account the account whose matches are listed
      * @param offset  how many matches to skip, at least 0
