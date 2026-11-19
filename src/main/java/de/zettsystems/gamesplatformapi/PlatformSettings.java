@@ -12,7 +12,9 @@ import java.util.Optional;
  * a game started on its own provides its own implementation.
  *
  * <p>The account is always the one signed in for the current request or UI session, never a
- * parameter. The game decides what keys mean, which values are allowed and what applies when a key
+ * parameter. Calls outside a request or UI session, such as background threads or computer moves,
+ * have no account: reading gives nothing and writing throws. A game therefore reads its settings
+ * while it builds a view. The game decides what keys mean, which values are allowed and what applies when a key
  * has no value; it falls back to its default for a value it does not understand. Deleting an
  * account deletes its settings.
  *

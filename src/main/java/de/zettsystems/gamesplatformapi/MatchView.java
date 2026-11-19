@@ -8,8 +8,9 @@ import java.util.Optional;
  * it, for example the match's chat.
  *
  * <p>A match is identified by the game and the match id together. The game is the one the view
- * belongs to: a view below {@code /<gameKey>/} shows matches of that game, and the platform takes
- * the game key from there, never from the view. The view tells only the match id.
+ * belongs to: the game whose module contains the view class, and whose views all live below
+ * {@code /<gameKey>/}. The platform determines it from there, never from an answer of the view;
+ * the view tells only the match id.
  *
  * <p>The platform asks after every navigation, once the view has read its parameters and checked
  * access. Rights are not derived from the answer: the platform still asks the game's

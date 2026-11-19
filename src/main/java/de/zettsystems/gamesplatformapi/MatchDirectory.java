@@ -16,8 +16,8 @@ public interface MatchDirectory {
     String gameKey();
 
     /**
-     * The matches the account takes part in that are open or running. Finished matches belong to
-     * the game's own archive and are not listed.
+     * The matches the account takes part in that are open or running. Finished matches are listed by
+     * {@link #finishedMatchesOf(AccountId, int, int)}.
      */
     List<MatchSummary> matchesOf(AccountId account);
 
