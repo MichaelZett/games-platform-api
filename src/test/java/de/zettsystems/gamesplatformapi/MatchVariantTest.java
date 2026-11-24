@@ -95,6 +95,7 @@ class MatchVariantTest {
         };
 
         assertThat(accounts.mayUseVariant(ALICE, "starfare", "spaceward")).isTrue();
+        assertThat(accounts.variantStage("starfare", "spaceward")).isEqualTo(LifecycleStage.PRODUCTION);
     }
 
     private static MatchSummary summary(String variant) {

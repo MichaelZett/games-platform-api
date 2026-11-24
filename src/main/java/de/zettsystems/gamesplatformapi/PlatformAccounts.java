@@ -67,4 +67,20 @@ public interface PlatformAccounts {
     default boolean mayUseVariant(AccountId account, String gameKey, String variant) {
         return true;
     }
+
+    /**
+     * The stage of a variant of the game's rules, for the game to mark a variant in alpha or beta
+     * where it is chosen or shown. It says nothing about who may use the variant; ask
+     * {@link #mayUseVariant} for that. A variant the platform does not know is in alpha.
+     *
+     * <p>The default answers {@link LifecycleStage#PRODUCTION}, matching {@link #mayUseVariant}: a
+     * platform without stages per variant marks none.
+     *
+     * @param gameKey the key of the game, as in its game descriptor
+     * @param variant the key of the variant, as the game declares it in its game descriptor
+     * @since 0.5.0
+     */
+    default LifecycleStage variantStage(String gameKey, String variant) {
+        return LifecycleStage.PRODUCTION;
+    }
 }

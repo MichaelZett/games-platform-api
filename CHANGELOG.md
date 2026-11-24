@@ -14,14 +14,18 @@ Draft, tried out locally with the platform and its games before it is released.
 - Stages per variant of a game's rules: `PlatformAccounts.mayUseVariant(account, gameKey, variant)`
   answers whether the account may use a variant. The platform keeps a stage (alpha, beta,
   production) per variant next to the stage of the game; a variant it does not know counts as alpha.
+  `PlatformAccounts.variantStage(gameKey, variant)` names the stage as a `LifecycleStage` (`ALPHA`,
+  `BETA`, `PRODUCTION`), so that a game can mark a variant where it is chosen.
 - `MatchSummary.variant` and `MatchEnded.variant`: the variant a match is played with, written like
   a game key, or `null` for a game without variants. The platform hides matches of a variant the
   viewer may not use, marks those in alpha or beta and keeps the variant with the result.
 
 ### Compatibility
 
-- `mayUseVariant` is a default method that opens every variant, so a platform without stages per
-  variant behaves as before.
+- `mayUseVariant` and `variantStage` are default methods that open every variant and mark none, so a
+  platform without stages per variant behaves as before.
+- New enum `LifecycleStage`; further stages may follow, so a `switch` over it keeps a `default`
+  branch.
 - `MatchSummary` and `MatchEnded` keep their earlier constructors, which leave the variant empty.
 
 ## 0.4.0 - 2026-11-19

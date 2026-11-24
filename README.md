@@ -37,7 +37,8 @@ All in the package `de.zettsystems.gamesplatformapi`.
 | `FinishedMatch` | A finished match in an account's archive: title, end, result, tutorial, path of the review (since 0.4.0). |
 | `ChatAccess` | `NONE`, `READ` or `WRITE`: what an account may do in a match's chat; the game decides, the platform keeps and shows the chat (since 0.4.0). |
 | `MatchView` | Implemented by a game's view that shows one match: which match it shows, or none (since 0.4.0). |
-| `PlatformAccounts` | Implemented by the platform (since 0.3.0): who is signed in, display names, testers of a game; since 0.5.0 whether an account may use a variant of the rules, which has a stage of its own. |
+| `PlatformAccounts` | Implemented by the platform (since 0.3.0): who is signed in, display names, testers of a game; since 0.5.0 whether an account may use a variant of the rules and the variant's `LifecycleStage`. |
+| `LifecycleStage` | `ALPHA`, `BETA` or `PRODUCTION`: how far a game or a variant of its rules has come (since 0.5.0). The platform keeps it; a game shows it where a variant is chosen. |
 | `PlatformFriends` | Implemented by the platform (since 0.2.0): an account's friends and whether two accounts are friends or blocked. |
 | `PlatformPresence` | Implemented by the platform (since 0.2.0): who is online and who may see whom, always for a viewer. |
 | `PlatformSettings` | Implemented by the platform (since 0.4.0): the signed-in account's settings per game, across devices. |
@@ -153,7 +154,8 @@ A game announces the end of a match once, even if it lets the match go on.
   against 0.4.0 or later; an older one would count them in its statistics.
 - A game with variants of its rules declares them with their first stage in its
   game descriptor, asks `mayUseVariant` before a variant is chosen, joined or
-  entered, and names the variant in `MatchSummary` and `MatchEnded`. The same
+  entered, marks it by `variantStage` where it is chosen, and names the variant
+  in `MatchSummary` and `MatchEnded`. The same
   key in all three places.
 
 ## Building
