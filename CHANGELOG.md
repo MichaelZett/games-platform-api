@@ -5,6 +5,25 @@ Notable changes to games-platform-api. The format follows
 [SemVer](https://semver.org/); before 1.0.0 a minor version may break the
 contract.
 
+## 0.5.0 - unreleased
+
+Draft, tried out locally with the platform and its games before it is released.
+
+### Added
+
+- Stages per variant of a game's rules: `PlatformAccounts.mayUseVariant(account, gameKey, variant)`
+  answers whether the account may use a variant. The platform keeps a stage (alpha, beta,
+  production) per variant next to the stage of the game; a variant it does not know counts as alpha.
+- `MatchSummary.variant` and `MatchEnded.variant`: the variant a match is played with, written like
+  a game key, or `null` for a game without variants. The platform hides matches of a variant the
+  viewer may not use, marks those in alpha or beta and keeps the variant with the result.
+
+### Compatibility
+
+- `mayUseVariant` is a default method that opens every variant, so a platform without stages per
+  variant behaves as before.
+- `MatchSummary` and `MatchEnded` keep their earlier constructors, which leave the variant empty.
+
 ## 0.4.0 - 2026-11-19
 
 ### Added

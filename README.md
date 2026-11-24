@@ -29,7 +29,7 @@ All in the package `de.zettsystems.gamesplatformapi`.
 |---|---|
 | `AccountId` | The platform account of a person (a positive `long` id). |
 | `MatchStatus` | `OPEN` (waiting for players), `RUNNING`, `FINISHED`. |
-| `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats and how many of them computer opponents take, who is to move, last change, path of the match view; since 0.4.0 also whether it is a tutorial, its `Tempo` and its pending decisions. |
+| `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats and how many of them computer opponents take, who is to move, last change, path of the match view; since 0.4.0 also whether it is a tutorial, its `Tempo` and its pending decisions; since 0.5.0 the variant of the rules it is played with. |
 | `Tempo` | How fast a match with several people runs: `LIVE`, `BRISK`, `DAILY`, `RELAXED` (since 0.4.0). Chosen when the match is created; the game sets and enforces the time per turn. |
 | `PendingDecision` | A decision a running match waits for from one account: a stable id, `DecisionKind` `TURN` or `ANSWER`, an optional deadline that only ever becomes earlier (since 0.4.0). |
 | `MatchDirectory` | Implemented by every game: the matches of an account, the open matches a viewer could join, the account's open invitations (since 0.2.0), its finished matches page by page and what an account may do in a match's chat (since 0.4.0). The later ones are default methods. |
@@ -37,13 +37,13 @@ All in the package `de.zettsystems.gamesplatformapi`.
 | `FinishedMatch` | A finished match in an account's archive: title, end, result, tutorial, path of the review (since 0.4.0). |
 | `ChatAccess` | `NONE`, `READ` or `WRITE`: what an account may do in a match's chat; the game decides, the platform keeps and shows the chat (since 0.4.0). |
 | `MatchView` | Implemented by a game's view that shows one match: which match it shows, or none (since 0.4.0). |
-| `PlatformAccounts` | Implemented by the platform (since 0.3.0): who is signed in, display names, testers of a game. |
+| `PlatformAccounts` | Implemented by the platform (since 0.3.0): who is signed in, display names, testers of a game; since 0.5.0 whether an account may use a variant of the rules, which has a stage of its own. |
 | `PlatformFriends` | Implemented by the platform (since 0.2.0): an account's friends and whether two accounts are friends or blocked. |
 | `PlatformPresence` | Implemented by the platform (since 0.2.0): who is online and who may see whom, always for a viewer. |
 | `PlatformSettings` | Implemented by the platform (since 0.4.0): the signed-in account's settings per game, across devices. |
 | `MatchChanged` | Event: something the lobby shows has changed (join, leave, start, turn, title). Carries no summary; the platform asks the `MatchDirectory` again. |
 | `MatchStarted`, `InvitationSent`, `DecisionsOpened`, `TurnMissed` | Events for notices and reminders (since 0.4.0), published in addition to `MatchChanged`. They carry what a notice needs, because the match may have moved on by the time the platform could ask. |
-| `MatchEnded` | Event: a match has ended, with a `MatchResult`; since 0.4.0 marked as tutorial where it was one. |
+| `MatchEnded` | Event: a match has ended, with a `MatchResult`; since 0.4.0 marked as tutorial where it was one, since 0.5.0 with the variant of the rules. |
 | `AccountRemoved` | Event from the platform (since 0.3.0): an account was deleted; games remove its data in the same transaction. |
 | `MatchResult` | Sealed: `Ranked` (a `Placement` per participant) or `Aborted` (the participants, no places). |
 | `Placement` | The place of an account; 1 is best, ties share a place (1, 1, 3), computer opponents count but are not listed. A `Departure` marks players who resigned, were eliminated or, since 0.4.0, removed for missing turns (`TIMED_OUT`, with the place held at the removal, never a win); it does not change the place. |
@@ -151,6 +151,10 @@ A game announces the end of a match once, even if it lets the match go on.
   comes from the session.
 - Report the end of tutorials (`MatchEnded.tutorial`) only to a platform built
   against 0.4.0 or later; an older one would count them in its statistics.
+- A game with variants of its rules declares them with their first stage in its
+  game descriptor, asks `mayUseVariant` before a variant is chosen, joined or
+  entered, and names the variant in `MatchSummary` and `MatchEnded`. The same
+  key in all three places.
 
 ## Building
 

@@ -1,5 +1,7 @@
 package de.zettsystems.gamesplatformapi;
 
+import org.jspecify.annotations.Nullable;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -24,6 +26,19 @@ final class Checks {
                             + gameKey + "'");
         }
         return gameKey;
+    }
+
+    /**
+     * A variant of the game's rules, written like a game key; {@code null} for a match without
+     * one.
+     */
+    static @Nullable String variant(@Nullable String variant) {
+        if (variant != null && !GAME_KEY.matcher(variant).matches()) {
+            throw new IllegalArgumentException(
+                    "variant must consist of lower-case letters, digits and hyphens, starting with a letter: '"
+                            + variant + "'");
+        }
+        return variant;
     }
 
     static String text(String value, String name) {

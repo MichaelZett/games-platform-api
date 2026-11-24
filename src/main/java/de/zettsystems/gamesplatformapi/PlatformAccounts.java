@@ -48,4 +48,23 @@ public interface PlatformAccounts {
      * @param gameKey the key of the game, as in its game descriptor
      */
     boolean isTester(AccountId account, String gameKey);
+
+    /**
+     * Whether the account may use a variant of the game's rules, for example to create a match
+     * with it, to join or to enter one. The platform keeps a stage (alpha, beta, production) per
+     * variant, next to the stage of the game; the account must be allowed into the game and into
+     * the stage of the variant. A variant the platform does not know counts as alpha. Ask on every
+     * use, because stages and roles change while sessions are running.
+     *
+     * <p>The default opens every variant: a platform without stages per variant leaves the
+     * decision to whether the account may enter the game at all.
+     *
+     * @param account the account to ask about, not necessarily the one signed in
+     * @param gameKey the key of the game, as in its game descriptor
+     * @param variant the key of the variant, as the game declares it in its game descriptor
+     * @since 0.5.0
+     */
+    default boolean mayUseVariant(AccountId account, String gameKey, String variant) {
+        return true;
+    }
 }

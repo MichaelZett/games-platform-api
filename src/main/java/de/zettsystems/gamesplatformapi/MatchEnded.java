@@ -1,5 +1,7 @@
 package de.zettsystems.gamesplatformapi;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -23,19 +25,29 @@ import java.util.OptionalInt;
  * @param endedAt  when the match ended
  * @param result   the ranking of the participants, or that the match was aborted
  * @param tutorial whether the match was a tutorial (since 0.4.0)
+ * @param variant  the key of the variant of the game's rules the match was played with, as the game
+ *                 declares it in its game descriptor; {@code null} for a game without variants
+ *                 (since 0.5.0). The platform keeps it with the result.
  */
-public record MatchEnded(String gameKey, String matchId, Instant endedAt, MatchResult result, boolean tutorial) {
+public record MatchEnded(String gameKey, String matchId, Instant endedAt, MatchResult result, boolean tutorial,
+                         @Nullable String variant) {
 
     public MatchEnded {
         Checks.gameKey(gameKey);
         Checks.text(matchId, "matchId");
         Objects.requireNonNull(endedAt, "endedAt");
         Objects.requireNonNull(result, "result");
+        Checks.variant(variant);
+    }
+
+    /** The end of a match without the variant added in 0.5.0. */
+    public MatchEnded(String gameKey, String matchId, Instant endedAt, MatchResult result, boolean tutorial) {
+        this(gameKey, matchId, endedAt, result, tutorial, null);
     }
 
     /** The end of a match that was not a tutorial. */
     public MatchEnded(String gameKey, String matchId, Instant endedAt, MatchResult result) {
-        this(gameKey, matchId, endedAt, result, false);
+        this(gameKey, matchId, endedAt, result, false, null);
     }
 
     /** Whether the match ended without a result. */

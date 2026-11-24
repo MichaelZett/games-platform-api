@@ -34,6 +34,10 @@ import java.util.Optional;
  *                         {@code toMove}: every account to move has at least one, and every entry
  *                         belongs to a participant. Empty for a game that does not report them; then
  *                         {@code toMove} alone says who is to move.
+ * @param variant          the key of the variant of the game's rules the match is played with, as
+ *                         the game declares it in its game descriptor; {@code null} for a game
+ *                         without variants. The platform hides matches of a variant the viewer may
+ *                         not use and marks those of a variant in alpha or beta (since 0.5.0).
  */
 public record MatchSummary(
         String gameKey,
@@ -48,7 +52,8 @@ public record MatchSummary(
         String viewPath,
         boolean tutorial,
         @Nullable Tempo tempo,
-        List<PendingDecision> pendingDecisions
+        List<PendingDecision> pendingDecisions,
+        @Nullable String variant
 ) {
 
     public MatchSummary {
@@ -61,19 +66,29 @@ public record MatchSummary(
         Objects.requireNonNull(lastChange, "lastChange");
         Checks.viewPath(viewPath, gameKey);
         pendingDecisions = Checks.decisions(pendingDecisions, "pendingDecisions");
+        Checks.variant(variant);
         checkSeats(seats, computerSeats, participants.size());
         checkMoves(status, participants, toMove, pendingDecisions);
     }
 
+    /** A summary without the variant added in 0.5.0. */
+    public MatchSummary(String gameKey, String matchId, String title, MatchStatus status,
+                        List<AccountId> participants, int seats, int computerSeats, List<AccountId> toMove,
+                        Instant lastChange, String viewPath, boolean tutorial, @Nullable Tempo tempo,
+                        List<PendingDecision> pendingDecisions) {
+        this(gameKey, matchId, title, status, participants, seats, computerSeats, toMove, lastChange, viewPath,
+                tutorial, tempo, pendingDecisions, null);
+    }
+
     /**
-     * A summary without the information added in 0.4.0: no tutorial, no tempo, no pending
-     * decisions.
+     * A summary without the information added in 0.4.0 and 0.5.0: no tutorial, no tempo, no
+     * pending decisions, no variant.
      */
     public MatchSummary(String gameKey, String matchId, String title, MatchStatus status,
                         List<AccountId> participants, int seats, int computerSeats, List<AccountId> toMove,
                         Instant lastChange, String viewPath) {
         this(gameKey, matchId, title, status, participants, seats, computerSeats, toMove, lastChange, viewPath,
-                false, null, List.of());
+                false, null, List.of(), null);
     }
 
     private static void checkSeats(int seats, int computerSeats, int participants) {
