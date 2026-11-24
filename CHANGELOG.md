@@ -5,9 +5,7 @@ Notable changes to games-platform-api. The format follows
 [SemVer](https://semver.org/); before 1.0.0 a minor version may break the
 contract.
 
-## 0.5.0 - unreleased
-
-Draft, tried out locally with the platform and its games before it is released.
+## 0.5.0 - 2026-11-24
 
 ### Added
 

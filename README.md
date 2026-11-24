@@ -18,7 +18,7 @@ match. This library defines the shared types.
   missing value throws a `NullPointerException` naming the field, an invalid
   one an `IllegalArgumentException`.
 
-Status: `0.4.0` on Maven Central. Before 1.0.0 a minor version may
+Status: `0.5.0` on Maven Central. Before 1.0.0 a minor version may
 break the contract; the changelog says what changed.
 
 ## Types
@@ -80,7 +80,7 @@ Dependency from Maven Central:
 
 ```groovy
 dependencies {
-    implementation 'de.zettsystems:games-platform-api:0.4.0'
+    implementation 'de.zettsystems:games-platform-api:0.5.0'
 }
 ```
 
