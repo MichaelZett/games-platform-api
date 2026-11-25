@@ -25,3 +25,6 @@ Thumbs.db
 ### Secrets / local state ###
 *.env
 .env.local
+
+# Eigene Eingabeordner des Users
+_input*/
