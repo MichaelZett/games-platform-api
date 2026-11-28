@@ -30,7 +30,7 @@ All in the package `de.zettsystems.gamesplatformapi`.
 | `AccountId` | The platform account of a person (a positive `long` id). |
 | `MatchStatus` | `OPEN` (waiting for players), `RUNNING`, `FINISHED`. |
 | `MatchSummary` | What the lobby shows about a match: game key, match id, title, status, participants, seats and how many of them computer opponents take, who is to move, last change, path of the match view; since 0.4.0 also whether it is a tutorial, its `Tempo` and its pending decisions; since 0.5.0 the variant of the rules it is played with. |
-| `Tempo` | How fast a match with several people runs: `LIVE`, `BRISK`, `DAILY`, `RELAXED` (since 0.4.0). Chosen when the match is created; the game sets and enforces the time per turn. |
+| `Tempo` | How fast a match with several people runs: `LIVE`, `BRISK`, `DAILY`, `EVERY_OTHER_DAY` (since 0.6.0), `RELAXED` (since 0.4.0). Chosen when the match is created; the game sets and enforces the time per turn. |
 | `PendingDecision` | A decision a running match waits for from one account: a stable id, `DecisionKind` `TURN` or `ANSWER`, an optional deadline that only ever becomes earlier (since 0.4.0). |
 | `MatchDirectory` | Implemented by every game: the matches of an account, the open matches a viewer could join, the account's open invitations (since 0.2.0), its finished matches page by page and what an account may do in a match's chat (since 0.4.0). The later ones are default methods. |
 | `MatchInvitation` | An invitation to a match for one account: the match and who invited. Accepting and declining happen in the game. |

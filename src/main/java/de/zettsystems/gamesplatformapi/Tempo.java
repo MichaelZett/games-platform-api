@@ -25,6 +25,13 @@ public enum Tempo {
     /** One turn a day; about 24 hours per turn. */
     DAILY,
 
+    /**
+     * One turn every other day; about 48 hours per turn.
+     *
+     * @since 0.6.0
+     */
+    EVERY_OTHER_DAY,
+
     /** Little time, long matches; about 72 hours per turn. */
     RELAXED
 }

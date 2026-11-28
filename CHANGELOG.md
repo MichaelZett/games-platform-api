@@ -5,6 +5,19 @@ Notable changes to games-platform-api. The format follows
 [SemVer](https://semver.org/); before 1.0.0 a minor version may break the
 contract.
 
+## 0.6.0 - 2026-11-28
+
+### Added
+
+- `Tempo.EVERY_OTHER_DAY`: one turn every other day, about 48 hours per turn, between `DAILY` and
+  `RELAXED`. Every game offers it once it moves to this version.
+
+### Compatibility
+
+- A new enum constant: a `switch` expression over `Tempo` without a `default` branch no longer
+  compiles and needs the new case. Games that store a tempo by name are not affected; code that
+  relies on `ordinal()` sees `RELAXED` move from 3 to 4.
+
 ## 0.5.0 - 2026-11-24
 
 ### Added
